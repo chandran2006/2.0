@@ -44,9 +44,13 @@ const PatientDashboard: React.FC = () => {
     socketService.connect();
     socketService.on('doctor_online', handleDoctorOnline);
     socketService.on('doctor_offline', handleDoctorOffline);
+    
+    const interval = setInterval(loadData, 3000);
+    
     return () => {
       socketService.off('doctor_online', handleDoctorOnline);
       socketService.off('doctor_offline', handleDoctorOffline);
+      clearInterval(interval);
     };
   }, [user]);
 
@@ -94,9 +98,15 @@ const PatientDashboard: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="font-display text-2xl md:text-3xl font-bold">Good Morning, Ramesh 👋</h1>
-        <p className="text-muted-foreground mt-1">Here's your health overview for today</p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="font-display text-2xl md:text-3xl font-bold">Good Morning, {user?.name?.split(' ')[0] || 'Patient'} 👋</h1>
+          <p className="text-muted-foreground mt-1">Here's your health overview for today</p>
+        </div>
+        <Badge variant="outline" className="gap-2">
+          <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
+          Auto-refresh: 3s
+        </Badge>
       </div>
 
       {/* Health Metrics */}
@@ -128,25 +138,43 @@ const PatientDashboard: React.FC = () => {
           <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
             <Calendar className="w-5 h-5 text-primary-foreground" />
           </div>
-          <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">Book Appointment</span>
+          <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">Appointments</span>
+        </button>
+        <button onClick={() => navigate('/patient/prescriptions')} className="flex items-center gap-3 p-4 rounded-xl bg-card border border-border shadow-card hover:shadow-card-hover transition-all group">
+          <div className="w-10 h-10 rounded-lg bg-success flex items-center justify-center">
+            <FileText className="w-5 h-5 text-primary-foreground" />
+          </div>
+          <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">Prescriptions</span>
+        </button>
+        <button onClick={() => navigate('/patient/medicines')} className="flex items-center gap-3 p-4 rounded-xl bg-card border border-border shadow-card hover:shadow-card-hover transition-all group">
+          <div className="w-10 h-10 rounded-lg bg-info flex items-center justify-center">
+            <Pill className="w-5 h-5 text-primary-foreground" />
+          </div>
+          <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">Medicines</span>
+        </button>
+        <button onClick={() => navigate('/patient/health-records')} className="flex items-center gap-3 p-4 rounded-xl bg-card border border-border shadow-card hover:shadow-card-hover transition-all group">
+          <div className="w-10 h-10 rounded-lg bg-warning flex items-center justify-center">
+            <Heart className="w-5 h-5 text-primary-foreground" />
+          </div>
+          <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">Health Records</span>
+        </button>
+        <button onClick={() => navigate('/patient/pharmacy')} className="flex items-center gap-3 p-4 rounded-xl bg-card border border-border shadow-card hover:shadow-card-hover transition-all group">
+          <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center">
+            <MapPin className="w-5 h-5 text-primary-foreground" />
+          </div>
+          <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">Pharmacy Finder</span>
+        </button>
+        <button onClick={() => navigate('/patient/symptom-checker')} className="flex items-center gap-3 p-4 rounded-xl bg-card border border-border shadow-card hover:shadow-card-hover transition-all group">
+          <div className="w-10 h-10 rounded-lg bg-destructive flex items-center justify-center">
+            <Stethoscope className="w-5 h-5 text-primary-foreground" />
+          </div>
+          <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">Symptom Checker</span>
         </button>
         <button onClick={() => navigate('/patient/doctors')} className="flex items-center gap-3 p-4 rounded-xl bg-card border border-border shadow-card hover:shadow-card-hover transition-all group">
           <div className="w-10 h-10 rounded-lg bg-info flex items-center justify-center">
             <Video className="w-5 h-5 text-primary-foreground" />
           </div>
           <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">Video Consultation</span>
-        </button>
-        <button onClick={() => navigate('/patient/prescriptions')} className="flex items-center gap-3 p-4 rounded-xl bg-card border border-border shadow-card hover:shadow-card-hover transition-all group">
-          <div className="w-10 h-10 rounded-lg bg-success flex items-center justify-center">
-            <FileText className="w-5 h-5 text-primary-foreground" />
-          </div>
-          <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">My Prescriptions</span>
-        </button>
-        <button onClick={() => navigate('/patient/pharmacy')} className="flex items-center gap-3 p-4 rounded-xl bg-card border border-border shadow-card hover:shadow-card-hover transition-all group">
-          <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center">
-            <MapPin className="w-5 h-5 text-primary-foreground" />
-          </div>
-          <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">Find Pharmacy</span>
         </button>
       </div>
 

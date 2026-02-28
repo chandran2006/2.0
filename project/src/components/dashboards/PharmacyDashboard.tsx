@@ -17,6 +17,8 @@ const PharmacyDashboard: React.FC = () => {
 
   useEffect(() => {
     loadData();
+    const interval = setInterval(loadData, 3000);
+    return () => clearInterval(interval);
   }, []);
 
   const loadData = async () => {
@@ -63,6 +65,10 @@ const PharmacyDashboard: React.FC = () => {
           <p className="text-muted-foreground mt-1">Manage inventory and orders</p>
         </div>
         <div className="flex gap-2">
+          <Badge variant="outline" className="gap-2">
+            <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
+            Auto-refresh: 3s
+          </Badge>
           <Button variant="outline" size="sm" onClick={handleRefresh} disabled={loading}>
             <RefreshCw className={`w-4 h-4 mr-1 ${loading ? 'animate-spin' : ''}`} /> Refresh
           </Button>

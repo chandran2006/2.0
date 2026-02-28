@@ -14,6 +14,8 @@ const AdminDashboard: React.FC = () => {
 
   useEffect(() => {
     loadData();
+    const interval = setInterval(loadData, 3000);
+    return () => clearInterval(interval);
   }, []);
 
   const loadData = async () => {
@@ -64,6 +66,10 @@ const AdminDashboard: React.FC = () => {
           <p className="text-muted-foreground mt-1">System overview and management</p>
         </div>
         <div className="flex gap-2">
+          <Badge variant="outline" className="gap-2">
+            <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
+            Auto-refresh: 3s
+          </Badge>
           <Button size="sm" variant="outline" onClick={() => navigate('/admin/analytics')}>
             <TrendingUp className="w-4 h-4 mr-1" /> Analytics
           </Button>

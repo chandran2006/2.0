@@ -25,9 +25,13 @@ const DoctorDashboard: React.FC = () => {
     loadData();
     socketService.connect();
     socketService.on('consultation_request', handleConsultationRequest);
+    
+    const interval = setInterval(loadData, 3000);
+    
     return () => {
       if (isOnline) toggleOnlineStatus(false);
       socketService.off('consultation_request', handleConsultationRequest);
+      clearInterval(interval);
     };
   }, [user]);
 
@@ -104,6 +108,10 @@ const DoctorDashboard: React.FC = () => {
           <p className="text-muted-foreground mt-1">{user?.specialization || 'Specialist'}</p>
         </div>
         <div className="flex items-center gap-4">
+          <Badge variant="outline" className="gap-2">
+            <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
+            Auto-refresh: 3s
+          </Badge>
           <div className="flex items-center gap-3 px-4 py-2 rounded-xl bg-card border border-border shadow-card">
             <span className={`w-2.5 h-2.5 rounded-full ${isOnline ? 'bg-success animate-pulse-soft' : 'bg-muted-foreground'}`} />
             <span className="text-sm font-medium">{isOnline ? 'Online' : 'Offline'}</span>
