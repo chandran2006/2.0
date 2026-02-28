@@ -1,0 +1,100 @@
+import React, { useState, useEffect } from 'react';
+import { Star, Calendar, Search } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { appointmentAPI } from '@/services/api';
+import { BookAppointmentDialog } from '@/components/shared/BookAppointmentDialog';
+
+const DoctorsPage: React.FC = () => {
+  const [doctors, setDoctors] = useState<any[]>([]);
+  const [filteredDoctors, setFilteredDoctors] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [bookingOpen, setBookingOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  useEffect(() => {
+    loadDoctors();
+  }, []);
+
+  useEffect(() => {
+    if (searchQuery) {
+      setFilteredDoctors(doctors.filter(doc => 
+        doc.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        doc.specialization?.toLowerCase().includes(searchQuery.toLowerCase())
+      ));
+    } else {
+      setFilteredDoctors(doctors);
+    }
+  }, [searchQuery, doctors]);
+
+  const loadDoctors = () => {
+    appointmentAPI.getDoctors()
+      .then(res => {
+        setDoctors(res.data || []);
+        setFilteredDoctors(res.data || []);
+      })
+      .catch(err => console.error(err))
+      .finally(() => setLoading(false));
+  };
+
+  if (loading) return <div className="text-center py-8">Loading...</div>;
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="font-display text-2xl font-bold">Find Doctors</h1>
+        <p className="text-muted-foreground mt-1">Book appointments with qualified specialists</p>
+      </div>
+
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+        <Input 
+          placeholder="Search by name or specialization..." 
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-10"
+        />
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-4">
+        {filteredDoctors.map((doc) => (
+          <Card key={doc.id} className="shadow-card hover:shadow-card-hover transition-shadow">
+            <CardContent className="p-4 flex items-center gap-4">
+              <div className="w-14 h-14 rounded-full bg-info flex items-center justify-center text-info-foreground font-bold text-lg">
+                {doc.name?.split(' ').pop()?.charAt(0) || 'D'}
+              </div>
+              <div className="flex-1">
+                <p className="font-medium">{doc.name}</p>
+                <p className="text-sm text-muted-foreground">{doc.specialization}</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <div className="flex items-center gap-1">
+                    <Star className="w-3 h-3 text-warning fill-warning" />
+                    <span className="text-xs font-medium">4.8</span>
+                  </div>
+                  <span className={`inline-flex items-center gap-1 text-xs ${doc.isAvailable ? 'text-success' : 'text-muted-foreground'}`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${doc.isAvailable ? 'bg-success animate-pulse-soft' : 'bg-muted-foreground'}`} />
+                    {doc.isAvailable ? 'Online' : 'Offline'}
+                  </span>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-sm font-semibold">₹500</p>
+                <Button size="sm" onClick={() => setBookingOpen(true)} className="mt-2 bg-gradient-primary text-primary-foreground h-8 text-xs">
+                  <Calendar className="w-3 h-3 mr-1" /> Book
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+        {filteredDoctors.length === 0 && (
+          <p className="col-span-2 text-center text-muted-foreground py-8">No doctors found</p>
+        )}
+      </div>
+
+      <BookAppointmentDialog open={bookingOpen} onOpenChange={setBookingOpen} onSuccess={loadDoctors} />
+    </div>
+  );
+};
+
+export default DoctorsPage;

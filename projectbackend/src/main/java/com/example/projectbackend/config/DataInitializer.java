@@ -20,6 +20,14 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) {
         System.out.println("=== Starting Data Initialization ===");
+        
+        // Check if data already exists
+        if (userRepository.count() > 0) {
+            System.out.println("Data already exists. Skipping initialization.");
+            System.out.println("Total users in database: " + userRepository.count());
+            return;
+        }
+        
         // Create sample users
         User patient = User.builder()
                 .email("patient1@teleasha.com")

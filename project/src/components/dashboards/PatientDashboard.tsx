@@ -1,10 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Heart, Activity, Thermometer, Weight, Clock, Calendar, Pill, Video, MapPin, FileText, Stethoscope, ChevronRight, Star, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { mockDoctors, mockAppointments, mockPrescriptions, mockReminders } from '@/data/mockData';
+import { useAuth } from '@/contexts/AuthContext';
+import { appointmentAPI, prescriptionAPI, callAPI } from '@/services/api';
+import { BookAppointmentDialog } from '@/components/shared/BookAppointmentDialog';
+import { VideoCall } from '@/components/shared/VideoCall';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
+import socketService from '@/services/socket';
 
 const healthMetrics = [
   { label: 'Heart Rate', value: '72', unit: 'bpm', icon: Heart, trend: 'stable' as const, color: 'text-destructive' },
@@ -21,8 +27,69 @@ const quickActions = [
 ];
 
 const PatientDashboard: React.FC = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'overview' | 'appointments' | 'prescriptions' | 'doctors'>('overview');
-  const onlineDoctors = mockDoctors.filter(d => d.isOnline);
+  const [appointments, setAppointments] = useState<any[]>([]);
+  const [prescriptions, setPrescriptions] = useState<any[]>([]);
+  const [doctors, setDoctors] = useState<any[]>([]);
+  const [onlineDoctors, setOnlineDoctors] = useState<any[]>([]);
+  const [bookingOpen, setBookingOpen] = useState(false);
+  const [callOpen, setCallOpen] = useState(false);
+  const [callRoomId, setCallRoomId] = useState('');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadData();
+    socketService.connect();
+    socketService.on('doctor_online', handleDoctorOnline);
+    socketService.on('doctor_offline', handleDoctorOffline);
+    return () => {
+      socketService.off('doctor_online', handleDoctorOnline);
+      socketService.off('doctor_offline', handleDoctorOffline);
+    };
+  }, [user]);
+
+  const loadData = async () => {
+    if (!user?.id) return;
+    try {
+      const [aptsRes, rxRes, docsRes, availRes] = await Promise.all([
+        appointmentAPI.getPatientAppointments(parseInt(user.id)),
+        prescriptionAPI.getPatientPrescriptions(parseInt(user.id)),
+        appointmentAPI.getDoctors(),
+        callAPI.getAvailableDoctors()
+      ]);
+      setAppointments(aptsRes.data || []);
+      setPrescriptions(rxRes.data || []);
+      setDoctors(docsRes.data || []);
+      setOnlineDoctors(availRes.data || []);
+    } catch (error) {
+      console.error('Error loading data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDoctorOnline = (data: any) => {
+    setOnlineDoctors(prev => [...prev.filter(d => d.id !== data.doctorId), data]);
+  };
+
+  const handleDoctorOffline = (data: any) => {
+    setOnlineDoctors(prev => prev.filter(d => d.id !== data.doctorId));
+  };
+
+  const startConsultation = async (doctorId: string) => {
+    try {
+      const roomId = `room_${user?.id}_${doctorId}_${Date.now()}`;
+      await callAPI.initiate({ patientId: user?.id, doctorId, roomId });
+      socketService.emit('consultation_request', { patientId: user?.id, doctorId, roomId });
+      setCallRoomId(roomId);
+      setCallOpen(true);
+      toast.success('Consultation request sent!');
+    } catch (error) {
+      toast.error('Failed to start consultation');
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -57,17 +124,30 @@ const PatientDashboard: React.FC = () => {
 
       {/* Quick Actions */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {quickActions.map((action) => (
-          <button
-            key={action.label}
-            className="flex items-center gap-3 p-4 rounded-xl bg-card border border-border shadow-card hover:shadow-card-hover transition-all group"
-          >
-            <div className={`w-10 h-10 rounded-lg ${action.color} flex items-center justify-center`}>
-              <action.icon className="w-5 h-5 text-primary-foreground" />
-            </div>
-            <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">{action.label}</span>
-          </button>
-        ))}
+        <button onClick={() => setBookingOpen(true)} className="flex items-center gap-3 p-4 rounded-xl bg-card border border-border shadow-card hover:shadow-card-hover transition-all group">
+          <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
+            <Calendar className="w-5 h-5 text-primary-foreground" />
+          </div>
+          <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">Book Appointment</span>
+        </button>
+        <button onClick={() => navigate('/patient/doctors')} className="flex items-center gap-3 p-4 rounded-xl bg-card border border-border shadow-card hover:shadow-card-hover transition-all group">
+          <div className="w-10 h-10 rounded-lg bg-info flex items-center justify-center">
+            <Video className="w-5 h-5 text-primary-foreground" />
+          </div>
+          <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">Video Consultation</span>
+        </button>
+        <button onClick={() => navigate('/patient/prescriptions')} className="flex items-center gap-3 p-4 rounded-xl bg-card border border-border shadow-card hover:shadow-card-hover transition-all group">
+          <div className="w-10 h-10 rounded-lg bg-success flex items-center justify-center">
+            <FileText className="w-5 h-5 text-primary-foreground" />
+          </div>
+          <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">My Prescriptions</span>
+        </button>
+        <button onClick={() => navigate('/patient/pharmacy')} className="flex items-center gap-3 p-4 rounded-xl bg-card border border-border shadow-card hover:shadow-card-hover transition-all group">
+          <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center">
+            <MapPin className="w-5 h-5 text-primary-foreground" />
+          </div>
+          <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">Find Pharmacy</span>
+        </button>
       </div>
 
       {/* Tabs */}
@@ -88,62 +168,66 @@ const PatientDashboard: React.FC = () => {
       {/* Tab content */}
       {activeTab === 'overview' && (
         <div className="grid md:grid-cols-2 gap-6">
-          {/* Today's Reminders */}
           <Card className="shadow-card">
             <CardHeader className="pb-3">
               <CardTitle className="font-display text-lg flex items-center gap-2">
                 <Clock className="w-5 h-5 text-primary" />
-                Today's Reminders
+                Upcoming Appointments
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {mockReminders.map((r) => (
-                <div key={r.id} className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
-                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                    r.type === 'medicine' ? 'bg-success/10 text-success' :
-                    r.type === 'appointment' ? 'bg-info/10 text-info' : 'bg-warning/10 text-warning'
-                  }`}>
-                    {r.type === 'medicine' ? <Pill className="w-4 h-4" /> :
-                     r.type === 'appointment' ? <Calendar className="w-4 h-4" /> :
-                     <Stethoscope className="w-4 h-4" />}
+              {loading ? (
+                <p className="text-sm text-muted-foreground text-center py-4">Loading...</p>
+              ) : appointments.filter(a => a.status === 'APPROVED').slice(0, 3).length > 0 ? (
+                appointments.filter(a => a.status === 'APPROVED').slice(0, 3).map((apt) => (
+                  <div key={apt.id} className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-info/10 text-info">
+                      <Calendar className="w-4 h-4" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium">{apt.doctorName}</p>
+                      <p className="text-xs text-muted-foreground">{new Date(apt.appointmentDate).toLocaleString()}</p>
+                    </div>
+                    <Button size="sm" onClick={() => startConsultation(apt.doctorId)} className="h-8 bg-gradient-primary">
+                      <Video className="w-3 h-3 mr-1" /> Join
+                    </Button>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium">{r.title}</p>
-                    <p className="text-xs text-muted-foreground">{r.description}</p>
-                  </div>
-                  <span className="text-xs text-muted-foreground whitespace-nowrap">{r.time}</span>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">No upcoming appointments</p>
+              )}
             </CardContent>
           </Card>
 
-          {/* Online Doctors */}
           <Card className="shadow-card">
             <CardHeader className="pb-3">
               <CardTitle className="font-display text-lg flex items-center gap-2">
                 <Video className="w-5 h-5 text-primary" />
-                Available Doctors
+                Available Doctors ({onlineDoctors.length})
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {onlineDoctors.map((doc) => (
+              {onlineDoctors.slice(0, 3).map((doc) => (
                 <div key={doc.id} className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
                   <div className="w-10 h-10 rounded-full bg-info flex items-center justify-center text-info-foreground font-bold text-sm">
-                    {doc.name.split(' ').pop()?.charAt(0)}
+                    {doc.name?.charAt(0) || 'D'}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium">{doc.name}</p>
                     <p className="text-xs text-muted-foreground">{doc.specialization}</p>
                   </div>
                   <div className="flex items-center gap-1">
-                    <Star className="w-3 h-3 text-warning fill-warning" />
-                    <span className="text-xs font-medium">{doc.rating}</span>
+                    <span className="w-2 h-2 rounded-full bg-success animate-pulse-soft" />
+                    <span className="text-xs text-success">Online</span>
                   </div>
-                  <Button size="sm" variant="outline" className="h-8">
-                    <Phone className="w-3 h-3 mr-1" /> Consult
+                  <Button size="sm" onClick={() => startConsultation(doc.id)} variant="outline" className="h-8">
+                    <Phone className="w-3 h-3 mr-1" /> Call
                   </Button>
                 </div>
               ))}
+              {onlineDoctors.length === 0 && (
+                <p className="text-sm text-muted-foreground text-center py-4">No doctors online</p>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -151,81 +235,102 @@ const PatientDashboard: React.FC = () => {
 
       {activeTab === 'appointments' && (
         <div className="space-y-3">
-          {mockAppointments.filter(a => a.patientId === 'p1').map((apt) => (
-            <Card key={apt.id} className="shadow-card">
-              <CardContent className="p-4 flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-info/10 flex items-center justify-center">
-                  <Calendar className="w-6 h-6 text-info" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium">{apt.doctorName}</p>
-                  <p className="text-sm text-muted-foreground">{apt.doctorSpecialization} · {new Date(apt.appointmentDate).toLocaleDateString()}</p>
-                </div>
-                <Badge variant={apt.status === 'APPROVED' ? 'default' : 'secondary'}>
-                  {apt.status}
-                </Badge>
-                <ChevronRight className="w-4 h-4 text-muted-foreground" />
-              </CardContent>
-            </Card>
-          ))}
+          {loading ? (
+            <p className="text-center py-8">Loading...</p>
+          ) : appointments.length > 0 ? (
+            appointments.map((apt) => (
+              <Card key={apt.id} className="shadow-card hover:shadow-card-hover transition-shadow cursor-pointer" onClick={() => navigate('/patient/appointments')}>
+                <CardContent className="p-4 flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-info/10 flex items-center justify-center">
+                    <Calendar className="w-6 h-6 text-info" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium">{apt.doctorName}</p>
+                    <p className="text-sm text-muted-foreground">{apt.doctorSpecialization} · {new Date(apt.appointmentDate).toLocaleDateString()}</p>
+                  </div>
+                  <Badge variant={apt.status === 'APPROVED' ? 'default' : 'secondary'}>
+                    {apt.status}
+                  </Badge>
+                  <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                </CardContent>
+              </Card>
+            ))
+          ) : (
+            <p className="text-center text-muted-foreground py-8">No appointments found</p>
+          )}
         </div>
       )}
 
       {activeTab === 'prescriptions' && (
         <div className="space-y-3">
-          {mockPrescriptions.map((rx) => (
-            <Card key={rx.id} className="shadow-card">
-              <CardContent className="p-4 flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center">
-                  <Pill className="w-6 h-6 text-success" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium">{rx.medicineName}</p>
-                  <p className="text-sm text-muted-foreground">{rx.dosage} · {rx.duration}</p>
-                  <p className="text-xs text-muted-foreground mt-1">By {rx.doctorName}</p>
-                </div>
-                <Badge variant={rx.status === 'ACTIVE' ? 'default' : 'secondary'}>
-                  {rx.status}
-                </Badge>
-              </CardContent>
-            </Card>
-          ))}
+          {loading ? (
+            <p className="text-center py-8">Loading...</p>
+          ) : prescriptions.length > 0 ? (
+            prescriptions.map((rx) => (
+              <Card key={rx.id} className="shadow-card hover:shadow-card-hover transition-shadow cursor-pointer" onClick={() => navigate('/patient/prescriptions')}>
+                <CardContent className="p-4 flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center">
+                    <Pill className="w-6 h-6 text-success" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium">{rx.medicineName}</p>
+                    <p className="text-sm text-muted-foreground">{rx.dosage} · {rx.duration}</p>
+                    <p className="text-xs text-muted-foreground mt-1">By {rx.doctorName}</p>
+                  </div>
+                  <Badge variant={rx.status === 'ACTIVE' ? 'default' : 'secondary'}>
+                    {rx.status}
+                  </Badge>
+                </CardContent>
+              </Card>
+            ))
+          ) : (
+            <p className="text-center text-muted-foreground py-8">No prescriptions found</p>
+          )}
         </div>
       )}
 
       {activeTab === 'doctors' && (
         <div className="grid md:grid-cols-2 gap-4">
-          {mockDoctors.map((doc) => (
-            <Card key={doc.id} className="shadow-card">
-              <CardContent className="p-4 flex items-center gap-4">
-                <div className="w-14 h-14 rounded-full bg-info flex items-center justify-center text-info-foreground font-bold text-lg">
-                  {doc.name.split(' ').pop()?.charAt(0)}
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium">{doc.name}</p>
-                  <p className="text-sm text-muted-foreground">{doc.specialization} · {doc.experience} yrs</p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <div className="flex items-center gap-1">
-                      <Star className="w-3 h-3 text-warning fill-warning" />
-                      <span className="text-xs font-medium">{doc.rating}</span>
-                    </div>
-                    <span className={`inline-flex items-center gap-1 text-xs ${doc.isOnline ? 'text-success' : 'text-muted-foreground'}`}>
-                      <span className={`w-1.5 h-1.5 rounded-full ${doc.isOnline ? 'bg-success animate-pulse-soft' : 'bg-muted-foreground'}`} />
-                      {doc.isOnline ? 'Online' : 'Offline'}
-                    </span>
+          {loading ? (
+            <p className="col-span-2 text-center py-8">Loading...</p>
+          ) : doctors.length > 0 ? (
+            doctors.map((doc) => (
+              <Card key={doc.id} className="shadow-card hover:shadow-card-hover transition-shadow">
+                <CardContent className="p-4 flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-full bg-info flex items-center justify-center text-info-foreground font-bold text-lg">
+                    {doc.name?.split(' ').pop()?.charAt(0) || 'D'}
                   </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm font-semibold">₹{doc.consultationFee}</p>
-                  <Button size="sm" className="mt-2 bg-gradient-primary text-primary-foreground shadow-primary hover:opacity-90 h-8 text-xs">
-                    Book Now
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                  <div className="flex-1">
+                    <p className="font-medium">{doc.name}</p>
+                    <p className="text-sm text-muted-foreground">{doc.specialization}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <div className="flex items-center gap-1">
+                        <Star className="w-3 h-3 text-warning fill-warning" />
+                        <span className="text-xs font-medium">4.8</span>
+                      </div>
+                      <span className={`inline-flex items-center gap-1 text-xs ${doc.isAvailable ? 'text-success' : 'text-muted-foreground'}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${doc.isAvailable ? 'bg-success animate-pulse-soft' : 'bg-muted-foreground'}`} />
+                        {doc.isAvailable ? 'Online' : 'Offline'}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-semibold">₹500</p>
+                    <Button size="sm" onClick={() => setBookingOpen(true)} className="mt-2 bg-gradient-primary text-primary-foreground shadow-primary hover:opacity-90 h-8 text-xs">
+                      Book Now
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          ) : (
+            <p className="col-span-2 text-center text-muted-foreground py-8">No doctors found</p>
+          )}
         </div>
       )}
+
+      <BookAppointmentDialog open={bookingOpen} onOpenChange={setBookingOpen} onSuccess={loadData} />
+      {callOpen && <VideoCall open={callOpen} onClose={() => setCallOpen(false)} roomId={callRoomId} userId={user?.id || ''} />}
     </div>
   );
 };

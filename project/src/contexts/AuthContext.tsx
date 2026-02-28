@@ -20,7 +20,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = useCallback(async (email: string, password: string): Promise<boolean> => {
     try {
+      console.log('Attempting login for:', email);
       const response = await authAPI.login(email, password);
+      console.log('Login response:', response.data);
       if (response.data.user) {
         const userData = {
           id: response.data.user.id.toString(),
@@ -36,18 +38,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         };
         setUser(userData);
         localStorage.setItem('teleasha_user', JSON.stringify(userData));
+        console.log('Login successful');
         return true;
       }
+      console.error('No user data in response');
       return false;
-    } catch (error) {
-      console.error('Login error:', error);
+    } catch (error: any) {
+      console.error('Login error:', error.response?.data || error.message);
       return false;
     }
   }, []);
 
   const register = useCallback(async (name: string, email: string, password: string, role: UserRole): Promise<boolean> => {
     try {
+      console.log('Attempting registration for:', email, 'as', role);
       const response = await authAPI.register({ name, email, password, role });
+      console.log('Registration response:', response.data);
       if (response.data.user) {
         const userData = {
           id: response.data.user.id.toString(),
@@ -58,11 +64,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         };
         setUser(userData);
         localStorage.setItem('teleasha_user', JSON.stringify(userData));
+        console.log('Registration successful');
         return true;
       }
+      console.error('No user data in response');
       return false;
-    } catch (error) {
-      console.error('Registration error:', error);
+    } catch (error: any) {
+      console.error('Registration error:', error.response?.data || error.message);
       return false;
     }
   }, []);

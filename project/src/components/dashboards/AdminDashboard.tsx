@@ -1,36 +1,76 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Users, Stethoscope, FileText, Activity, Server, Database, Shield, TrendingUp } from 'lucide-react';
+import { Users, Stethoscope, FileText, Activity, Server, TrendingUp } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-
-const systemStats = [
-  { label: 'Total Users', value: '1,250', icon: Users, color: 'text-primary', bg: 'bg-primary/10' },
-  { label: 'Consultations', value: '3,421', icon: Stethoscope, color: 'text-info', bg: 'bg-info/10' },
-  { label: 'Prescriptions', value: '8,921', icon: FileText, color: 'text-success', bg: 'bg-success/10' },
-  { label: 'Uptime', value: '99.9%', icon: Activity, color: 'text-warning', bg: 'bg-warning/10' },
-];
-
-const userBreakdown = [
-  { role: 'Patients', count: 650, color: 'bg-primary' },
-  { role: 'Doctors', count: 120, color: 'bg-info' },
-  { role: 'Pharmacies', count: 45, color: 'bg-success' },
-  { role: 'Admins', count: 5, color: 'bg-accent' },
-];
-
-const systemHealth = [
-  { service: 'API Server', status: 'healthy', uptime: '99.99%' },
-  { service: 'Database', status: 'healthy', uptime: '99.95%' },
-  { service: 'WebSocket', status: 'healthy', uptime: '99.90%' },
-  { service: 'File Storage', status: 'warning', uptime: '98.50%' },
-];
+import { Button } from '@/components/ui/button';
+import { appointmentAPI, prescriptionAPI } from '@/services/api';
+import { useNavigate } from 'react-router-dom';
 
 const AdminDashboard: React.FC = () => {
+  const navigate = useNavigate();
+  const [stats, setStats] = useState({ users: 0, consultations: 0, prescriptions: 0, uptime: '99.9%' });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    try {
+      const [aptsRes, rxRes] = await Promise.all([
+        appointmentAPI.getDoctors(),
+        prescriptionAPI.getPatientPrescriptions(1)
+      ]);
+      setStats({
+        users: aptsRes.data?.length || 0,
+        consultations: 0,
+        prescriptions: rxRes.data?.length || 0,
+        uptime: '99.9%'
+      });
+    } catch (error) {
+      console.error('Error loading data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const systemStats = [
+    { label: 'Total Users', value: stats.users.toString(), icon: Users, color: 'text-primary', bg: 'bg-primary/10' },
+    { label: 'Consultations', value: stats.consultations.toString(), icon: Stethoscope, color: 'text-info', bg: 'bg-info/10' },
+    { label: 'Prescriptions', value: stats.prescriptions.toString(), icon: FileText, color: 'text-success', bg: 'bg-success/10' },
+    { label: 'Uptime', value: stats.uptime, icon: Activity, color: 'text-warning', bg: 'bg-warning/10' },
+  ];
+
+  const userBreakdown = [
+    { role: 'Patients', count: 650, color: 'bg-primary' },
+    { role: 'Doctors', count: 120, color: 'bg-info' },
+    { role: 'Pharmacies', count: 45, color: 'bg-success' },
+    { role: 'Admins', count: 5, color: 'bg-accent' },
+  ];
+
+  const systemHealth = [
+    { service: 'API Server', status: 'healthy', uptime: '99.99%' },
+    { service: 'Database', status: 'healthy', uptime: '99.95%' },
+    { service: 'WebSocket', status: 'healthy', uptime: '99.90%' },
+    { service: 'File Storage', status: 'healthy', uptime: '98.50%' },
+  ];
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="font-display text-2xl md:text-3xl font-bold">Admin Dashboard</h1>
-        <p className="text-muted-foreground mt-1">System overview and management</p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="font-display text-2xl md:text-3xl font-bold">Admin Dashboard</h1>
+          <p className="text-muted-foreground mt-1">System overview and management</p>
+        </div>
+        <div className="flex gap-2">
+          <Button size="sm" variant="outline" onClick={() => navigate('/admin/analytics')}>
+            <TrendingUp className="w-4 h-4 mr-1" /> Analytics
+          </Button>
+          <Button size="sm" onClick={() => navigate('/admin/users')} className="bg-gradient-primary">
+            <Users className="w-4 h-4 mr-1" /> Manage Users
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -79,7 +119,7 @@ const AdminDashboard: React.FC = () => {
           <CardContent className="space-y-3">
             {systemHealth.map((service) => (
               <div key={service.service} className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                <div className={`w-2.5 h-2.5 rounded-full ${service.status === 'healthy' ? 'bg-success' : 'bg-warning'}`} />
+                <div className={`w-2.5 h-2.5 rounded-full ${service.status === 'healthy' ? 'bg-success animate-pulse-soft' : 'bg-warning'}`} />
                 <span className="text-sm font-medium flex-1">{service.service}</span>
                 <Badge variant={service.status === 'healthy' ? 'default' : 'secondary'}>
                   {service.status}
@@ -90,6 +130,30 @@ const AdminDashboard: React.FC = () => {
           </CardContent>
         </Card>
       </div>
+
+      <Card className="shadow-card">
+        <CardHeader>
+          <CardTitle className="font-display text-lg">Quick Actions</CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <Button variant="outline" onClick={() => navigate('/admin/users')} className="h-20 flex-col gap-2">
+            <Users className="w-6 h-6" />
+            <span className="text-sm">Manage Users</span>
+          </Button>
+          <Button variant="outline" onClick={() => navigate('/admin/analytics')} className="h-20 flex-col gap-2">
+            <TrendingUp className="w-6 h-6" />
+            <span className="text-sm">View Analytics</span>
+          </Button>
+          <Button variant="outline" className="h-20 flex-col gap-2">
+            <Server className="w-6 h-6" />
+            <span className="text-sm">System Logs</span>
+          </Button>
+          <Button variant="outline" className="h-20 flex-col gap-2">
+            <Activity className="w-6 h-6" />
+            <span className="text-sm">Monitor</span>
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   );
 };
