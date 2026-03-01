@@ -1,0 +1,116 @@
+╔══════════════════════════════════════════════════════════════════╗
+║                  🏥 MeDora Quick Reference Card                  ║
+╚══════════════════════════════════════════════════════════════════╝
+
+┌──────────────────────────────────────────────────────────────────┐
+│ 🚀 START SERVICES (IN ORDER)                                     │
+├──────────────────────────────────────────────────────────────────┤
+│ 1. Backend:  cd projectbackend && mvnw spring-boot:run          │
+│ 2. Frontend: cd project && npm run dev                           │
+│ 3. Call:     cd call-server && npm start                         │
+└──────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────┐
+│ 🔗 URLS                                                           │
+├──────────────────────────────────────────────────────────────────┤
+│ Frontend:    http://localhost:5173                               │
+│ Backend:     http://localhost:8080                               │
+│ H2 Console:  http://localhost:8080/h2-console                    │
+│ Test DB:     http://localhost:8080/api/auth/test-db              │
+│ Call Server: http://localhost:5002                               │
+└──────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────┐
+│ 👤 DEMO ACCOUNTS                                                  │
+├──────────────────────────────────────────────────────────────────┤
+│ Patient:  patient1@teleasha.com    / password123                 │
+│ Doctor:   dr.sharma@teleasha.com   / password123                 │
+│ Pharmacy: pharmacy@teleasha.com    / pharmacy123                 │
+│ Admin:    admin@teleasha.com       / admin123                    │
+└──────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────┐
+│ 🗄️ H2 DATABASE LOGIN                                             │
+├──────────────────────────────────────────────────────────────────┤
+│ JDBC URL: jdbc:h2:mem:medora                                     │
+│ Username: root                                                   │
+│ Password: Chandran@2006                                          │
+└──────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────┐
+│ 🧪 TESTING                                                        │
+├──────────────────────────────────────────────────────────────────┤
+│ Quick Test:  Open test-backend.html in browser                   │
+│ Check Status: Run check-services.bat                             │
+│ Full Test:   http://localhost:5173/login                         │
+└──────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────┐
+│ 📚 DOCUMENTATION                                                  │
+├──────────────────────────────────────────────────────────────────┤
+│ Quick Start:      STARTUP_GUIDE.md                               │
+│ Testing Guide:    TEST_LOGIN_SIGNUP.md                           │
+│ Technical Details: FIX_SUMMARY.md                                │
+│ Status Overview:  LOGIN_SIGNUP_FIXED.md                          │
+└──────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────┐
+│ 🔍 VERIFY SERVICES                                                │
+├──────────────────────────────────────────────────────────────────┤
+│ Backend:  netstat -ano | findstr :8080                           │
+│ Frontend: netstat -ano | findstr :5173                           │
+│ Call:     netstat -ano | findstr :5002                           │
+└──────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────┐
+│ ⚠️ TROUBLESHOOTING                                                │
+├──────────────────────────────────────────────────────────────────┤
+│ Can't connect?     → Check backend is running (port 8080)        │
+│ CORS errors?       → Ensure frontend on port 5173                │
+│ Login fails?       → Use demo account credentials                │
+│ Email exists?      → Use different email or delete from H2       │
+│ Blank page?        → Check browser console (F12)                 │
+└──────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────┐
+│ 🎯 SUCCESS INDICATORS                                             │
+├──────────────────────────────────────────────────────────────────┤
+│ ✅ Backend console: "Data Initialization Complete"               │
+│ ✅ Backend console: "Total users in database: 4"                 │
+│ ✅ Test DB returns: {"userCount": 4}                             │
+│ ✅ Login redirects to /dashboard                                 │
+│ ✅ Browser console: "Login successful"                           │
+└──────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────┐
+│ 🛠️ USEFUL SQL QUERIES (H2 Console)                               │
+├──────────────────────────────────────────────────────────────────┤
+│ View all users:    SELECT * FROM USERS;                          │
+│ Count users:       SELECT COUNT(*) FROM USERS;                   │
+│ Find by email:     SELECT * FROM USERS WHERE EMAIL = '...';      │
+│ Delete user:       DELETE FROM USERS WHERE EMAIL = '...';        │
+└──────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────┐
+│ 📋 API ENDPOINTS                                                  │
+├──────────────────────────────────────────────────────────────────┤
+│ POST /api/auth/login       - User login                          │
+│ POST /api/auth/register    - User registration                   │
+│ GET  /api/auth/test-db     - Test database connection            │
+│ GET  /api/auth/current-user/{id} - Get user by ID                │
+└──────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────┐
+│ 💡 PRO TIPS                                                       │
+├──────────────────────────────────────────────────────────────────┤
+│ • Always start backend FIRST                                     │
+│ • Wait for "Data Initialization Complete" before testing         │
+│ • Use test-backend.html for quick backend testing                │
+│ • Check browser console (F12) for errors                         │
+│ • Use H2 console to inspect database                             │
+│ • Run check-services.bat to verify all services                  │
+└──────────────────────────────────────────────────────────────────┘
+
+╔══════════════════════════════════════════════════════════════════╗
+║  Status: ✅ READY TO USE | All components configured & tested    ║
+╚══════════════════════════════════════════════════════════════════╝

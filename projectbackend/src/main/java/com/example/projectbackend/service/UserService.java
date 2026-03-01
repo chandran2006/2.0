@@ -16,8 +16,25 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     
     public User register(User user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userRepository.save(user);
+        try {
+            // Check if email already exists
+            Optional<User> existing = userRepository.findByEmail(user.getEmail());
+            if (existing.isPresent()) {
+                throw new RuntimeException("Email already registered");
+            }
+            
+            // Encode password
+            String encodedPassword = passwordEncoder.encode(user.getPassword());
+            user.setPassword(encodedPassword);
+            
+            // Save user
+            User savedUser = userRepository.save(user);
+            System.out.println("User saved successfully with ID: " + savedUser.getId());
+            return savedUser;
+        } catch (Exception e) {
+            System.err.println("Error in UserService.register: " + e.getMessage());
+            throw e;
+        }
     }
     
     public Optional<User> login(String email, String password) {

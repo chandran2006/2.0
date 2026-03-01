@@ -20,15 +20,26 @@ const SignUpPage: React.FC = () => {
   const [role, setRole] = useState<UserRole>('PATIENT');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const { register } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
     setLoading(true);
-    await register(name, email, password, role);
-    setLoading(false);
-    navigate('/dashboard');
+    try {
+      const success = await register(name, email, password, role);
+      if (success) {
+        navigate('/dashboard');
+      } else {
+        setError('Registration failed. Please try again.');
+      }
+    } catch (err) {
+      setError('Unable to connect to server. Please ensure backend is running.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -118,6 +129,10 @@ const SignUpPage: React.FC = () => {
                 </button>
               </div>
             </div>
+
+            {error && (
+              <p className="text-sm text-destructive bg-destructive/10 p-3 rounded-lg">{error}</p>
+            )}
 
             <Button type="submit" className="w-full h-11 bg-gradient-primary text-primary-foreground shadow-primary hover:opacity-90" disabled={loading}>
               {loading ? 'Creating account...' : 'Create Account'}

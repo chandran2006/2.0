@@ -21,30 +21,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = useCallback(async (email: string, password: string): Promise<boolean> => {
     try {
       console.log('Attempting login for:', email);
+      console.log('API URL:', import.meta.env.VITE_API_URL || 'http://localhost:8080/api');
       const response = await authAPI.login(email, password);
       console.log('Login response:', response.data);
-      if (response.data.user) {
+      if (response.data && response.data.user) {
         const userData = {
           id: response.data.user.id.toString(),
           email: response.data.user.email,
           name: response.data.user.name,
           role: response.data.user.role,
-          phone: response.data.user.phone,
-          address: response.data.user.address,
-          specialization: response.data.user.specialization,
-          licenseNumber: response.data.user.licenseNumber,
-          pharmacyName: response.data.user.pharmacyName,
-          createdAt: response.data.user.createdAt,
+          phone: response.data.user.phone || '',
+          address: response.data.user.address || '',
+          specialization: response.data.user.specialization || '',
+          licenseNumber: response.data.user.licenseNumber || '',
+          pharmacyName: response.data.user.pharmacyName || '',
+          createdAt: response.data.user.createdAt || new Date().toISOString(),
         };
         setUser(userData);
         localStorage.setItem('teleasha_user', JSON.stringify(userData));
-        console.log('Login successful');
+        console.log('Login successful, user:', userData);
         return true;
       }
-      console.error('No user data in response');
+      console.error('No user data in response:', response);
       return false;
     } catch (error: any) {
-      console.error('Login error:', error.response?.data || error.message);
+      console.error('Login error:', error);
+      console.error('Error details:', error.response?.data || error.message);
+      console.error('Error status:', error.response?.status);
       return false;
     }
   }, []);
@@ -52,25 +55,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const register = useCallback(async (name: string, email: string, password: string, role: UserRole): Promise<boolean> => {
     try {
       console.log('Attempting registration for:', email, 'as', role);
+      console.log('API URL:', import.meta.env.VITE_API_URL || 'http://localhost:8080/api');
       const response = await authAPI.register({ name, email, password, role });
       console.log('Registration response:', response.data);
-      if (response.data.user) {
+      if (response.data && response.data.user) {
         const userData = {
           id: response.data.user.id.toString(),
           email: response.data.user.email,
           name: response.data.user.name,
           role: response.data.user.role,
-          createdAt: response.data.user.createdAt,
+          phone: response.data.user.phone || '',
+          address: response.data.user.address || '',
+          createdAt: response.data.user.createdAt || new Date().toISOString(),
         };
         setUser(userData);
         localStorage.setItem('teleasha_user', JSON.stringify(userData));
-        console.log('Registration successful');
+        console.log('Registration successful, user:', userData);
         return true;
       }
-      console.error('No user data in response');
+      console.error('No user data in response:', response);
       return false;
     } catch (error: any) {
-      console.error('Registration error:', error.response?.data || error.message);
+      console.error('Registration error:', error);
+      console.error('Error details:', error.response?.data || error.message);
+      console.error('Error status:', error.response?.status);
       return false;
     }
   }, []);

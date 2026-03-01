@@ -34,9 +34,23 @@ public class User {
     private Boolean isAvailable = false;
     
     @Column(updatable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime createdAt;
     
-    private LocalDateTime updatedAt = LocalDateTime.now();
+    private LocalDateTime updatedAt;
+    
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+        if (isAvailable == null) {
+            isAvailable = false;
+        }
+    }
+    
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
     
     public enum Role {
         PATIENT, DOCTOR, PHARMACY, ADMIN

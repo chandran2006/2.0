@@ -17,9 +17,27 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user) {
         try {
-            System.out.println("Registration attempt for: " + user.getEmail());
+            System.out.println("=== Registration Request ===");
+            System.out.println("Email: " + user.getEmail());
+            System.out.println("Name: " + user.getName());
+            System.out.println("Role: " + user.getRole());
+            
+            // Validate required fields
+            if (user.getEmail() == null || user.getEmail().trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("message", "Email is required"));
+            }
+            if (user.getPassword() == null || user.getPassword().trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("message", "Password is required"));
+            }
+            if (user.getName() == null || user.getName().trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("message", "Name is required"));
+            }
+            if (user.getRole() == null) {
+                return ResponseEntity.badRequest().body(Map.of("message", "Role is required"));
+            }
+            
             User registered = userService.register(user);
-            System.out.println("Registration successful for: " + registered.getEmail());
+            System.out.println("Registration successful - User ID: " + registered.getId());
             return ResponseEntity.ok(Map.of("user", registered, "message", "Registration successful"));
         } catch (Exception e) {
             System.err.println("Registration failed: " + e.getMessage());

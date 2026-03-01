@@ -217,9 +217,9 @@ const Index = () => {
           </div>
           <p className="text-sm text-muted-foreground">© 2026 TeleAsha 2.0. All rights reserved.</p>
           <div className="flex items-center gap-6">
-            <a href="#" className="text-sm text-muted-foreground hover:text-foreground">Privacy</a>
-            <a href="#" className="text-sm text-muted-foreground hover:text-foreground">Terms</a>
-            <a href="#" className="text-sm text-muted-foreground hover:text-foreground">Contact</a>
+            <Link to="/privacy" className="text-sm text-muted-foreground hover:text-foreground">Privacy</Link>
+            <Link to="/terms" className="text-sm text-muted-foreground hover:text-foreground">Terms</Link>
+            <Link to="/contact" className="text-sm text-muted-foreground hover:text-foreground">Contact</Link>
           </div>
         </div>
       </footer>

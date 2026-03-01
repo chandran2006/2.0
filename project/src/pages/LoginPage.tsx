@@ -19,12 +19,17 @@ const LoginPage: React.FC = () => {
     e.preventDefault();
     setError('');
     setLoading(true);
-    const success = await login(email, password);
-    setLoading(false);
-    if (success) {
-      navigate('/dashboard');
-    } else {
-      setError('Invalid email or password');
+    try {
+      const success = await login(email, password);
+      if (success) {
+        navigate('/dashboard');
+      } else {
+        setError('Invalid email or password. Please check your credentials.');
+      }
+    } catch (err) {
+      setError('Unable to connect to server. Please ensure backend is running.');
+    } finally {
+      setLoading(false);
     }
   };
 
