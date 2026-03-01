@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { healthRecordAPI } from '@/services/api';
 import { useAuth } from '@/contexts/AuthContext';
+import DashboardLayout from '@/components/shared/DashboardLayout';
 
 const HealthRecordsPage: React.FC = () => {
   const { user } = useAuth();
@@ -35,10 +36,11 @@ const HealthRecordsPage: React.FC = () => {
 
   const displayRecords = records.length > 0 ? records : mockRecords;
 
-  if (loading) return <div className="text-center py-8">Loading...</div>;
+  if (loading) return <DashboardLayout><div className="text-center py-8">Loading...</div></DashboardLayout>;
 
   return (
-    <div className="space-y-6">
+    <DashboardLayout>
+      <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="font-display text-2xl font-bold">Health Records</h1>
@@ -98,6 +100,7 @@ const HealthRecordsPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
+    </DashboardLayout>
   );
 };
 

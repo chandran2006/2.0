@@ -3,6 +3,7 @@ import { MapPin, Phone, Clock, Star } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { pharmacyAPI } from '@/services/api';
+import DashboardLayout from '@/components/shared/DashboardLayout';
 
 const PharmacyPage: React.FC = () => {
   const [pharmacies, setPharmacies] = useState<any[]>([]);
@@ -15,10 +16,11 @@ const PharmacyPage: React.FC = () => {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <div className="text-center py-8">Loading...</div>;
+  if (loading) return <DashboardLayout><div className="text-center py-8">Loading...</div></DashboardLayout>;
 
   return (
-    <div className="space-y-6">
+    <DashboardLayout>
+      <div className="space-y-6">
       <h1 className="font-display text-2xl font-bold">Find Pharmacy</h1>
 
       <div className="grid md:grid-cols-2 gap-4">
@@ -51,7 +53,8 @@ const PharmacyPage: React.FC = () => {
           </Card>
         ))}
       </div>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 };
 

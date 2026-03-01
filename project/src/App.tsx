@@ -25,14 +25,22 @@ import SymptomCheckerPage from "./pages/patient/SymptomCheckerPage";
 // Doctor Pages
 import PatientsPage from "./pages/doctor/PatientsPage";
 import PrescriptionsManagePage from "./pages/doctor/PrescriptionsManagePage";
+import DoctorAppointmentsPage from "./pages/doctor/AppointmentsPage";
+import ConsultationsPage from "./pages/doctor/ConsultationsPage";
+import SchedulePage from "./pages/doctor/SchedulePage";
 
 // Pharmacy Pages
 import InventoryPage from "./pages/pharmacy/InventoryPage";
 import OrdersPage from "./pages/pharmacy/OrdersPage";
+import PharmacyPrescriptionsPage from "./pages/pharmacy/PrescriptionsPage";
+import SalesPage from "./pages/pharmacy/SalesPage";
+import PharmacySettingsPage from "./pages/pharmacy/SettingsPage";
 
 // Admin Pages
 import UsersManagePage from "./pages/admin/UsersManagePage";
 import AnalyticsPage from "./pages/admin/AnalyticsPage";
+import ReportsPage from "./pages/admin/ReportsPage";
+import AdminSettingsPage from "./pages/admin/SettingsPage";
 
 const queryClient = new QueryClient();
 
@@ -62,16 +70,24 @@ const App = () => (
             <Route path="/patient/symptom-checker" element={<SymptomCheckerPage />} />
             
             {/* Doctor Routes */}
+            <Route path="/doctor/appointments" element={<DoctorAppointmentsPage />} />
             <Route path="/doctor/patients" element={<PatientsPage />} />
             <Route path="/doctor/prescriptions" element={<PrescriptionsManagePage />} />
+            <Route path="/doctor/consultations" element={<ConsultationsPage />} />
+            <Route path="/doctor/schedule" element={<SchedulePage />} />
             
             {/* Pharmacy Routes */}
             <Route path="/pharmacy/inventory" element={<InventoryPage />} />
             <Route path="/pharmacy/orders" element={<OrdersPage />} />
+            <Route path="/pharmacy/prescriptions" element={<PharmacyPrescriptionsPage />} />
+            <Route path="/pharmacy/sales" element={<SalesPage />} />
+            <Route path="/pharmacy/settings" element={<PharmacySettingsPage />} />
             
             {/* Admin Routes */}
             <Route path="/admin/users" element={<UsersManagePage />} />
             <Route path="/admin/analytics" element={<AnalyticsPage />} />
+            <Route path="/admin/reports" element={<ReportsPage />} />
+            <Route path="/admin/settings" element={<AdminSettingsPage />} />
             
             <Route path="*" element={<NotFound />} />
           </Routes>

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import DashboardLayout from '@/components/shared/DashboardLayout';
 
 const SymptomCheckerPage: React.FC = () => {
   const [symptoms, setSymptoms] = useState('');
@@ -40,7 +41,8 @@ const SymptomCheckerPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <DashboardLayout>
+      <div className="space-y-6">
       <div>
         <h1 className="font-display text-2xl font-bold">Symptom Checker</h1>
         <p className="text-muted-foreground mt-1">AI-powered health analysis (For informational purposes only)</p>
@@ -140,6 +142,7 @@ const SymptomCheckerPage: React.FC = () => {
         </>
       )}
     </div>
+    </DashboardLayout>
   );
 };
 

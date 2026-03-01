@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Star, Calendar, Search } from 'lucide-react';
+import { Star, Calendar, Search, Video } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { appointmentAPI } from '@/services/api';
 import { BookAppointmentDialog } from '@/components/shared/BookAppointmentDialog';
+import { useAuth } from '@/contexts/AuthContext';
+import { io, Socket } from 'socket.io-client';
+import DashboardLayout from '@/components/shared/DashboardLayout';
 
 const DoctorsPage: React.FC = () => {
   const [doctors, setDoctors] = useState<any[]>([]);
@@ -12,10 +15,52 @@ const DoctorsPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [bookingOpen, setBookingOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [socket, setSocket] = useState<Socket | null>(null);
+  const { user } = useAuth();
 
   useEffect(() => {
     loadDoctors();
-  }, []);
+    
+    // Connect to call server for real-time doctor status
+    const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5002';
+    const newSocket = io(SOCKET_URL);
+    setSocket(newSocket);
+
+    // Register patient as online
+    if (user) {
+      newSocket.emit('patient_online', {
+        patientId: user.id,
+        name: user.name
+      });
+    }
+
+    // Listen for doctor status changes
+    newSocket.on('doctor_status_changed', (data: any) => {
+      console.log('Doctor status changed:', data);
+      setDoctors(prev => prev.map(doc => 
+        doc.id === data.doctorId 
+          ? { ...doc, isAvailable: data.isOnline }
+          : doc
+      ));
+    });
+
+    // Get initial online doctors list
+    newSocket.on('online_doctors_list', (onlineDoctors: any[]) => {
+      console.log('Online doctors:', onlineDoctors);
+      const onlineDoctorIds = new Set(onlineDoctors.map(d => d.doctorId));
+      setDoctors(prev => prev.map(doc => ({
+        ...doc,
+        isAvailable: onlineDoctorIds.has(doc.id)
+      })));
+    });
+
+    // Request online doctors list
+    newSocket.emit('get_online_doctors');
+
+    return () => {
+      newSocket.disconnect();
+    };
+  }, [user]);
 
   useEffect(() => {
     if (searchQuery) {
@@ -38,10 +83,29 @@ const DoctorsPage: React.FC = () => {
       .finally(() => setLoading(false));
   };
 
-  if (loading) return <div className="text-center py-8">Loading...</div>;
+  const handleInstantConsultation = (doctor: any) => {
+    if (!doctor.isAvailable) {
+      alert('Doctor is currently offline. Please book an appointment instead.');
+      return;
+    }
+    
+    if (socket) {
+      socket.emit('consultation_request', {
+        consultationId: `consult_${Date.now()}`,
+        doctorId: doctor.id,
+        patientId: user?.id,
+        patientName: user?.name,
+        reason: 'Instant consultation request'
+      });
+      alert('Consultation request sent to doctor. Please wait for acceptance.');
+    }
+  };
+
+  if (loading) return <DashboardLayout><div className="text-center py-8">Loading...</div></DashboardLayout>;
 
   return (
-    <div className="space-y-6">
+    <DashboardLayout>
+      <div className="space-y-6">
       <div>
         <h1 className="font-display text-2xl font-bold">Find Doctors</h1>
         <p className="text-muted-foreground mt-1">Book appointments with qualified specialists</p>
@@ -72,15 +136,32 @@ const DoctorsPage: React.FC = () => {
                     <Star className="w-3 h-3 text-warning fill-warning" />
                     <span className="text-xs font-medium">4.8</span>
                   </div>
-                  <span className={`inline-flex items-center gap-1 text-xs ${doc.isAvailable ? 'text-success' : 'text-muted-foreground'}`}>
-                    <span className={`w-1.5 h-1.5 rounded-full ${doc.isAvailable ? 'bg-success animate-pulse-soft' : 'bg-muted-foreground'}`} />
-                    {doc.isAvailable ? 'Online' : 'Offline'}
+                  <span className={`inline-flex items-center gap-1 text-xs font-medium ${
+                    doc.isAvailable ? 'text-success' : 'text-muted-foreground'
+                  }`}>
+                    <span className={`w-2 h-2 rounded-full ${
+                      doc.isAvailable ? 'bg-success animate-pulse' : 'bg-muted-foreground'
+                    }`} />
+                    {doc.isAvailable ? 'Online Now' : 'Offline'}
                   </span>
                 </div>
               </div>
-              <div className="text-right">
+              <div className="text-right space-y-2">
                 <p className="text-sm font-semibold">₹500</p>
-                <Button size="sm" onClick={() => setBookingOpen(true)} className="mt-2 bg-gradient-primary text-primary-foreground h-8 text-xs">
+                {doc.isAvailable && (
+                  <Button 
+                    size="sm" 
+                    onClick={() => handleInstantConsultation(doc)}
+                    className="bg-success text-success-foreground h-8 text-xs w-full"
+                  >
+                    <Video className="w-3 h-3 mr-1" /> Call Now
+                  </Button>
+                )}
+                <Button 
+                  size="sm" 
+                  onClick={() => setBookingOpen(true)} 
+                  className="bg-gradient-primary text-primary-foreground h-8 text-xs w-full"
+                >
                   <Calendar className="w-3 h-3 mr-1" /> Book
                 </Button>
               </div>
@@ -94,6 +175,7 @@ const DoctorsPage: React.FC = () => {
 
       <BookAppointmentDialog open={bookingOpen} onOpenChange={setBookingOpen} onSuccess={loadDoctors} />
     </div>
+    </DashboardLayout>
   );
 };
 

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { medicineAPI } from '@/services/api';
 import { toast } from 'sonner';
+import DashboardLayout from '@/components/shared/DashboardLayout';
 
 const MedicinesPage: React.FC = () => {
   const [medicines, setMedicines] = useState<any[]>([]);
@@ -45,7 +46,8 @@ const MedicinesPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <DashboardLayout>
+      <div className="space-y-6">
       <div>
         <h1 className="font-display text-2xl font-bold">Search Medicines</h1>
         <p className="text-muted-foreground mt-1">Find medicines and check availability</p>
@@ -96,7 +98,8 @@ const MedicinesPage: React.FC = () => {
           </p>
         )}
       </div>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 };
 

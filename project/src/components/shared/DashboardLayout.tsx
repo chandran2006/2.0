@@ -1,39 +1,43 @@
 import React from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Heart, LayoutDashboard, Calendar, FileText, Pill, Activity, MapPin, LogOut, User, Settings, Stethoscope, Package } from 'lucide-react';
+import { Heart, LayoutDashboard, Calendar, FileText, Pill, Activity, MapPin, LogOut, User, Settings, Stethoscope, Package, Clock, Video } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 
 const patientNav = [
   { label: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
-  { label: 'Appointments', icon: Calendar, path: '/dashboard/appointments' },
-  { label: 'Prescriptions', icon: FileText, path: '/dashboard/prescriptions' },
-  { label: 'Medicines', icon: Pill, path: '/dashboard/medicines' },
-  { label: 'Health Records', icon: Activity, path: '/dashboard/records' },
-  { label: 'Pharmacy Finder', icon: MapPin, path: '/dashboard/pharmacy' },
-  { label: 'Symptom Checker', icon: Stethoscope, path: '/dashboard/symptoms' },
+  { label: 'Find Doctors', icon: Stethoscope, path: '/patient/doctors' },
+  { label: 'Appointments', icon: Calendar, path: '/patient/appointments' },
+  { label: 'Prescriptions', icon: FileText, path: '/patient/prescriptions' },
+  { label: 'Medicines', icon: Pill, path: '/patient/medicines' },
+  { label: 'Health Records', icon: Activity, path: '/patient/health-records' },
+  { label: 'Pharmacy Finder', icon: MapPin, path: '/patient/pharmacy' },
+  { label: 'Symptom Checker', icon: Stethoscope, path: '/patient/symptom-checker' },
 ];
 
 const doctorNav = [
   { label: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
-  { label: 'Appointments', icon: Calendar, path: '/dashboard/appointments' },
-  { label: 'Consultations', icon: Stethoscope, path: '/dashboard/consultations' },
-  { label: 'Prescriptions', icon: FileText, path: '/dashboard/prescriptions' },
-  { label: 'Patients', icon: User, path: '/dashboard/patients' },
+  { label: 'Appointments', icon: Calendar, path: '/doctor/appointments' },
+  { label: 'Patients', icon: User, path: '/doctor/patients' },
+  { label: 'Prescriptions', icon: FileText, path: '/doctor/prescriptions' },
+  { label: 'Consultations', icon: Video, path: '/doctor/consultations' },
+  { label: 'Schedule', icon: Clock, path: '/doctor/schedule' },
 ];
 
 const pharmacyNav = [
   { label: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
-  { label: 'Inventory', icon: Package, path: '/dashboard/inventory' },
-  { label: 'Prescriptions', icon: FileText, path: '/dashboard/prescriptions' },
-  { label: 'Settings', icon: Settings, path: '/dashboard/settings' },
+  { label: 'Inventory', icon: Package, path: '/pharmacy/inventory' },
+  { label: 'Orders', icon: FileText, path: '/pharmacy/orders' },
+  { label: 'Prescriptions', icon: Pill, path: '/pharmacy/prescriptions' },
+  { label: 'Sales', icon: Activity, path: '/pharmacy/sales' },
+  { label: 'Settings', icon: Settings, path: '/pharmacy/settings' },
 ];
 
 const adminNav = [
   { label: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
-  { label: 'Users', icon: User, path: '/dashboard/users' },
-  { label: 'Reports', icon: FileText, path: '/dashboard/reports' },
-  { label: 'Settings', icon: Settings, path: '/dashboard/settings' },
+  { label: 'Users', icon: User, path: '/admin/users' },
+  { label: 'Reports', icon: FileText, path: '/admin/reports' },
+  { label: 'Settings', icon: Settings, path: '/admin/settings' },
 ];
 
 const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
