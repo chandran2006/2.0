@@ -1,13 +1,79 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Clock, Calendar, Plus, Edit, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
+import { callAPI } from '@/services/api';
 import DashboardLayout from '@/components/shared/DashboardLayout';
+import io from 'socket.io-client';
+
+const CALL_SERVER_URL = 'http://localhost:5002';
 
 const SchedulePage: React.FC = () => {
-  const [isAvailable, setIsAvailable] = useState(true);
+  const [isAvailable, setIsAvailable] = useState(false);
+  const { toast } = useToast();
+  const { user } = useAuth();
+  const [socket, setSocket] = useState<any>(null);
+
+  useEffect(() => {
+    const newSocket = io(CALL_SERVER_URL);
+    setSocket(newSocket);
+
+    return () => {
+      newSocket.disconnect();
+    };
+  }, []);
+
+  const handleAvailabilityToggle = async (checked: boolean) => {
+    try {
+      if (!user?.id) {
+        toast({
+          title: 'Error',
+          description: 'User not found',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      // Update backend
+      if (checked) {
+        await callAPI.doctorOnline(user.id);
+      } else {
+        await callAPI.doctorOffline(user.id);
+      }
+
+      // Update socket
+      if (socket) {
+        if (checked) {
+          socket.emit('doctor_online', {
+            doctorId: user.id,
+            name: user.name,
+            specialization: user.specialization || 'General Physician',
+          });
+        } else {
+          socket.emit('doctor_offline', {
+            doctorId: user.id,
+          });
+        }
+      }
+
+      setIsAvailable(checked);
+      toast({
+        title: 'Success',
+        description: `You are now ${checked ? 'online' : 'offline'}`,
+      });
+    } catch (error) {
+      console.error('Failed to update status:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update status',
+        variant: 'destructive',
+      });
+    }
+  };
 
   const schedule = [
     { day: 'Monday', slots: ['09:00 AM - 12:00 PM', '02:00 PM - 05:00 PM'], active: true },
@@ -43,7 +109,7 @@ const SchedulePage: React.FC = () => {
                 <Badge variant={isAvailable ? 'default' : 'secondary'}>
                   {isAvailable ? 'Online' : 'Offline'}
                 </Badge>
-                <Switch checked={isAvailable} onCheckedChange={setIsAvailable} />
+                <Switch checked={isAvailable} onCheckedChange={handleAvailabilityToggle} />
               </div>
             </div>
           </CardContent>
