@@ -54,15 +54,31 @@ public class CallController {
     }
     
     @PostMapping("/doctor/online")
-    public ResponseEntity<?> doctorOnline(@RequestBody Map<String, Long> request) {
-        userService.updateAvailability(request.get("doctorId"), true);
-        return ResponseEntity.ok(Map.of("message", "Doctor is now online"));
+    public ResponseEntity<?> doctorOnline(@RequestBody Map<String, Object> request) {
+        try {
+            Long doctorId = Long.valueOf(request.get("doctorId").toString());
+            System.out.println("Doctor going online: " + doctorId);
+            userService.updateAvailability(doctorId, true);
+            return ResponseEntity.ok(Map.of("message", "Doctor is now online", "success", true));
+        } catch (Exception e) {
+            System.err.println("Error in doctorOnline: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage(), "success", false));
+        }
     }
     
     @PostMapping("/doctor/offline")
-    public ResponseEntity<?> doctorOffline(@RequestBody Map<String, Long> request) {
-        userService.updateAvailability(request.get("doctorId"), false);
-        return ResponseEntity.ok(Map.of("message", "Doctor is now offline"));
+    public ResponseEntity<?> doctorOffline(@RequestBody Map<String, Object> request) {
+        try {
+            Long doctorId = Long.valueOf(request.get("doctorId").toString());
+            System.out.println("Doctor going offline: " + doctorId);
+            userService.updateAvailability(doctorId, false);
+            return ResponseEntity.ok(Map.of("message", "Doctor is now offline", "success", true));
+        } catch (Exception e) {
+            System.err.println("Error in doctorOffline: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage(), "success", false));
+        }
     }
     
     @GetMapping("/doctors/available")

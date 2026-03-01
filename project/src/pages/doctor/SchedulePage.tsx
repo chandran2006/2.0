@@ -30,19 +30,25 @@ const SchedulePage: React.FC = () => {
   const handleAvailabilityToggle = async (checked: boolean) => {
     try {
       if (!user?.id) {
+        console.error('User not found:', user);
         toast({
           title: 'Error',
-          description: 'User not found',
+          description: 'User not found. Please login again.',
           variant: 'destructive',
         });
         return;
       }
 
+      console.log('Updating doctor status:', { doctorId: user.id, checked });
+
       // Update backend
+      let response;
       if (checked) {
-        await callAPI.doctorOnline(user.id);
+        response = await callAPI.doctorOnline(user.id);
+        console.log('Doctor online response:', response.data);
       } else {
-        await callAPI.doctorOffline(user.id);
+        response = await callAPI.doctorOffline(user.id);
+        console.log('Doctor offline response:', response.data);
       }
 
       // Update socket
@@ -53,11 +59,15 @@ const SchedulePage: React.FC = () => {
             name: user.name,
             specialization: user.specialization || 'General Physician',
           });
+          console.log('Emitted doctor_online event');
         } else {
           socket.emit('doctor_offline', {
             doctorId: user.id,
           });
+          console.log('Emitted doctor_offline event');
         }
+      } else {
+        console.warn('Socket not connected');
       }
 
       setIsAvailable(checked);
@@ -65,11 +75,12 @@ const SchedulePage: React.FC = () => {
         title: 'Success',
         description: `You are now ${checked ? 'online' : 'offline'}`,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to update status:', error);
+      console.error('Error details:', error.response?.data || error.message);
       toast({
         title: 'Error',
-        description: 'Failed to update status',
+        description: error.response?.data?.message || 'Failed to update status. Please try again.',
         variant: 'destructive',
       });
     }

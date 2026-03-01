@@ -1,139 +1,65 @@
-# ✅ MeDora - Fixed & Enhanced
+# Quick Start - Test Doctor Online Status
 
-## 🔧 Issues Fixed
-
-### Database Issue
-- ✅ Changed from `create-drop` to `update` - database now persists
-- ✅ Added duplicate data prevention
-- ✅ Added logging to track initialization
-
-### Authentication Issue
-- ✅ Added detailed logging in frontend and backend
-- ✅ Added test endpoint to verify database
-- ✅ Better error handling
-
-### Missing Pages Issue
-- ✅ Created 10 new pages for all dashboard elements
-- ✅ Added proper routing
-- ✅ Connected to backend APIs
-
-## 🚀 Quick Start
-
-### 1. Start Backend (Terminal 1)
+## Step 1: Start Backend Server
 ```bash
-cd c:\Users\ganes\OneDrive\Desktop\2.0\projectbackend
-mvnw.cmd spring-boot:run
+cd projectbackend
+mvnw spring-boot:run
 ```
-Wait for: "=== Data Initialization Complete ===" message
+Wait for: "Started ProjectbackendApplication"
 
-### 2. Start Frontend (Terminal 2)
+## Step 2: Start Call Server
 ```bash
-cd c:\Users\ganes\OneDrive\Desktop\2.0\project
+cd call-server
+npm start
+```
+Wait for: "🏥 MeDora Call Server Started"
+
+## Step 3: Start Frontend
+```bash
+cd project
+npm run dev
+```
+Wait for: "Local: http://localhost:5173/"
+
+## Step 4: Test Doctor Online
+1. Open browser: http://localhost:5173
+2. Login as doctor: `dr.sharma@teleasha.com` / `password123`
+3. Click "Schedule" in sidebar
+4. Toggle "Online Status" switch to ON
+5. Check for success toast: "You are now online"
+
+## Step 5: Test Patient View
+1. Open new incognito window: http://localhost:5173
+2. Login as patient: `patient1@teleasha.com` / `password123`
+3. Click "Find Doctors" in sidebar
+4. Verify Dr. Sharma shows:
+   - ✅ Green pulsing dot
+   - ✅ "Online Now" text
+   - ✅ "Call Now" button
+
+## Troubleshooting
+
+### If frontend won't start:
+```bash
+cd project
+npm install
 npm run dev
 ```
 
-### 3. Start Call Server (Terminal 3)
+### If backend fails:
+- Check MySQL is running
+- Verify database credentials in application.properties
+
+### If call server fails:
 ```bash
-cd c:\Users\ganes\OneDrive\Desktop\2.0\call-server
+cd call-server
+npm install
 npm start
 ```
 
-### 4. Open Browser
-http://localhost:5173
+### Check all servers are running:
+- Backend: http://localhost:8080/api/calls/doctors/available
+- Call Server: http://localhost:5002/health
+- Frontend: http://localhost:5173
 
-## 🔑 Demo Accounts
-
-```
-Patient:  patient1@teleasha.com / password123
-Doctor:   dr.sharma@teleasha.com / password123
-Pharmacy: pharmacy@teleasha.com / pharmacy123
-Admin:    admin@teleasha.com / admin123
-```
-
-## 📄 New Pages Created
-
-### Patient Dashboard
-- ✅ Appointments Page
-- ✅ Prescriptions Page
-- ✅ Doctors Page
-- ✅ Pharmacy Finder Page
-
-### Doctor Dashboard
-- ✅ Patients Management Page
-- ✅ Prescriptions Management Page
-
-### Pharmacy Dashboard
-- ✅ Inventory Management Page
-- ✅ Orders Management Page
-
-### Admin Dashboard
-- ✅ Users Management Page
-- ✅ Analytics Page
-
-## 🧪 Test Database
-
-Open: http://localhost:8080/api/auth/test-db
-
-Should show:
-```json
-{
-  "message": "Database connection successful",
-  "userCount": 4
-}
-```
-
-## 📝 Files Modified
-
-### Backend (4 files)
-1. `application.properties` - Database persistence
-2. `DataInitializer.java` - Logging & duplicate prevention
-3. `AuthController.java` - Test endpoint & logging
-4. `UserService.java` - User count method
-
-### Frontend (11 files)
-1. `AuthContext.tsx` - Better logging
-2. `App.tsx` - New routes
-3-11. **10 new pages** in `pages/` directory
-
-## 🐛 Debugging
-
-### If login fails:
-1. Check backend console for "Login attempt for: [email]"
-2. Check browser console (F12) for errors
-3. Test: http://localhost:8080/api/auth/test-db
-
-### If signup fails:
-1. Check backend console for "Registration attempt for: [email]"
-2. Check browser console for errors
-3. Verify backend is running
-
-### Database not persisting:
-- Check `application.properties` has `spring.jpa.hibernate.ddl-auto=update`
-- Restart backend to apply changes
-
-## 📚 Full Documentation
-
-See `DATABASE_FIX_GUIDE.md` for complete details.
-
-## ✨ What's Working Now
-
-✅ Database persists between restarts
-✅ Login with demo accounts
-✅ Signup new users
-✅ All dashboard pages accessible
-✅ API integration ready
-✅ Proper error logging
-✅ Test endpoints available
-
-## 🎯 Next Steps (Optional)
-
-1. Connect dashboard quick action buttons to new pages
-2. Add form validation
-3. Implement WebRTC video calls
-4. Add real-time notifications
-5. Add loading spinners
-6. Enhance error messages
-
----
-
-**Ready to use!** Start all three servers and login with demo accounts.
+## All files are ready - just start the servers!

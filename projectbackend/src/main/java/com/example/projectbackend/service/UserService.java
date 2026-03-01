@@ -54,9 +54,18 @@ public class UserService {
     }
     
     public User updateAvailability(Long doctorId, Boolean isAvailable) {
-        User doctor = userRepository.findById(doctorId).orElseThrow();
-        doctor.setIsAvailable(isAvailable);
-        return userRepository.save(doctor);
+        try {
+            System.out.println("Updating availability for doctor " + doctorId + " to " + isAvailable);
+            User doctor = userRepository.findById(doctorId)
+                .orElseThrow(() -> new RuntimeException("Doctor not found with id: " + doctorId));
+            doctor.setIsAvailable(isAvailable);
+            User saved = userRepository.save(doctor);
+            System.out.println("Doctor availability updated successfully: " + saved.getIsAvailable());
+            return saved;
+        } catch (Exception e) {
+            System.err.println("Error updating availability: " + e.getMessage());
+            throw e;
+        }
     }
     
     public Optional<User> findById(Long id) {
