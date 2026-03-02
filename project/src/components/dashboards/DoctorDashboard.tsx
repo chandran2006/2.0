@@ -20,6 +20,7 @@ const DoctorDashboard: React.FC = () => {
   const [prescriptions, setPrescriptions] = useState<any[]>([]);
   const [stats, setStats] = useState({ consultations: 0, prescriptions: 0, revenue: 0 });
   const [loading, setLoading] = useState(true);
+  const [incomingCall, setIncomingCall] = useState<any>(null);
 
   useEffect(() => {
     loadData();
@@ -87,7 +88,65 @@ const DoctorDashboard: React.FC = () => {
   };
 
   const handleConsultationRequest = (data: any) => {
-    toast.info(`New consultation request from patient ${data.patientId}`);
+    console.log('Incoming consultation request:', data);
+    setIncomingCall(data);
+    toast.info(`Incoming call from ${data.patientName}`, {
+      duration: 10000,
+      action: {
+        label: 'View',
+        onClick: () => {}
+      }
+    });
+  };
+  
+  const acceptCall = async () => {
+    if (!incomingCall) return;
+    
+    try {
+      // Update call status in backend
+      await callAPI.acceptCall(incomingCall.callId);
+      
+      // Notify patient via socket
+      socketService.emit('consultation_accepted', {
+        callId: incomingCall.callId,
+        patientId: incomingCall.patientId,
+        doctorId: user?.id,
+        doctorName: user?.name,
+        roomId: incomingCall.roomId
+      });
+      
+      toast.success('Call accepted! Joining video call...');
+      
+      // Navigate to video call
+      navigate(`/video-call?room=${incomingCall.roomId}`);
+      
+      setIncomingCall(null);
+    } catch (error) {
+      console.error('Failed to accept call:', error);
+      toast.error('Failed to accept call');
+    }
+  };
+  
+  const rejectCall = async () => {
+    if (!incomingCall) return;
+    
+    try {
+      // Update call status in backend
+      await callAPI.rejectCall(incomingCall.callId);
+      
+      // Notify patient via socket
+      socketService.emit('consultation_rejected', {
+        callId: incomingCall.callId,
+        patientId: incomingCall.patientId,
+        reason: 'Doctor is busy'
+      });
+      
+      toast.info('Call declined');
+      setIncomingCall(null);
+    } catch (error) {
+      console.error('Failed to reject call:', error);
+      toast.error('Failed to reject call');
+    }
   };
 
   const handleAppointment = async (id: number, action: 'approve' | 'cancel') => {
@@ -115,6 +174,43 @@ const DoctorDashboard: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Incoming Call Notification */}
+      {incomingCall && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="fixed top-4 right-4 z-50 w-96 bg-card border-2 border-primary shadow-2xl rounded-xl p-4"
+        >
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center animate-pulse">
+              <Video className="w-6 h-6 text-primary" />
+            </div>
+            <div className="flex-1">
+              <p className="font-semibold text-lg">Incoming Call</p>
+              <p className="text-sm text-muted-foreground">{incomingCall.patientName}</p>
+              <p className="text-xs text-muted-foreground">{incomingCall.reason}</p>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              onClick={rejectCall}
+              variant="outline"
+              className="flex-1 border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
+            >
+              <X className="w-4 h-4 mr-2" />
+              Decline
+            </Button>
+            <Button
+              onClick={acceptCall}
+              className="flex-1 bg-success text-success-foreground hover:bg-success/90"
+            >
+              <Check className="w-4 h-4 mr-2" />
+              Accept
+            </Button>
+          </div>
+        </motion.div>
+      )}
+
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="font-display text-2xl md:text-3xl font-bold">{user?.name || 'Doctor'}</h1>

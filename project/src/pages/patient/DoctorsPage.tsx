@@ -4,10 +4,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { appointmentAPI } from '@/services/api';
+import { appointmentAPI, callAPI } from '@/services/api';
 import { BookAppointmentDialog } from '@/components/shared/BookAppointmentDialog';
 import { useAuth } from '@/contexts/AuthContext';
-import { io, Socket } from 'socket.io-client';
 import DashboardLayout from '@/components/shared/DashboardLayout';
 
 const DoctorsPage: React.FC = () => {
@@ -22,62 +21,7 @@ const DoctorsPage: React.FC = () => {
 
   useEffect(() => {
     loadDoctors();
-    
-    if (!user?.id) return;
-    
-    // Connect to call server for real-time doctor status
-    const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5002';
-    console.log('Patient connecting to call server:', SOCKET_URL);
-    const newSocket = io(SOCKET_URL);
-    setSocket(newSocket);
-
-    newSocket.on('connect', () => {
-      console.log('✅ Patient connected to call server, socket ID:', newSocket.id);
-      
-      // Register patient as online
-      newSocket.emit('patient_online', {
-        patientId: user.id,
-        name: user.name
-      });
-      console.log('✅ Patient registered:', user.id, user.name);
-    });
-
-    newSocket.on('connect_error', (error: any) => {
-      console.error('❌ Socket connection error:', error);
-      toast({
-        title: 'Connection Error',
-        description: 'Failed to connect to call server',
-        variant: 'destructive',
-      });
-    });
-
-    // Listen for doctor status changes
-    newSocket.on('doctor_status_changed', (data: any) => {
-      console.log('Doctor status changed:', data);
-      setDoctors(prev => prev.map(doc => 
-        doc.id === data.doctorId 
-          ? { ...doc, isAvailable: data.isOnline }
-          : doc
-      ));
-    });
-
-    // Get initial online doctors list
-    newSocket.on('online_doctors_list', (onlineDoctors: any[]) => {
-      console.log('Online doctors:', onlineDoctors);
-      const onlineDoctorIds = new Set(onlineDoctors.map(d => d.doctorId));
-      setDoctors(prev => prev.map(doc => ({
-        ...doc,
-        isAvailable: onlineDoctorIds.has(doc.id)
-      })));
-    });
-
-    // Request online doctors list
-    newSocket.emit('get_online_doctors');
-
-    return () => {
-      console.log('🔌 Patient disconnecting from call server');
-      newSocket.disconnect();
-    };
+    // Socket disabled - using Agora for calls
   }, [user, toast]);
 
   useEffect(() => {
@@ -102,81 +46,30 @@ const DoctorsPage: React.FC = () => {
   };
 
   const handleInstantConsultation = (doctor: any) => {
-    if (!doctor.isAvailable) {
+    // Create call invitation via backend
+    callAPI.initiate({
+      initiatorId: user?.id,
+      receiverId: doctor.id,
+      callType: 'VIDEO'
+    }).then(response => {
+      const callData = response.data;
+      const channelName = callData.channelName;
+      const token = callData.initiatorToken;
+      
       toast({
-        title: 'Doctor Offline',
-        description: 'Doctor is currently offline. Please book an appointment instead.',
+        title: 'Call Started',
+        description: 'Connecting to doctor...',
+      });
+      
+      window.location.href = `/video-call?room=${channelName}&appointmentId=${callData.call.id}&token=${token}`;
+    }).catch(error => {
+      console.error('Failed to initiate call:', error);
+      toast({
+        title: 'Call Failed',
+        description: 'Unable to start call. Please try again.',
         variant: 'destructive',
       });
-      return;
-    }
-    
-    if (!socket || !socket.connected) {
-      console.error('❌ Socket not connected');
-      toast({
-        title: 'Connection Error',
-        description: 'Not connected to call server. Please refresh the page.',
-        variant: 'destructive',
-      });
-      return;
-    }
-    
-    const roomId = `call_${user?.id}_${doctor.id}_${Date.now()}`;
-    console.log('📞 Sending consultation request:', { 
-      roomId, 
-      doctorId: doctor.id, 
-      patientId: user?.id,
-      socketConnected: socket.connected 
     });
-    
-    socket.emit('consultation_request', {
-      consultationId: roomId,
-      doctorId: doctor.id,
-      patientId: user?.id,
-      patientName: user?.name,
-      reason: 'Instant consultation request'
-    });
-    
-    console.log('✅ Consultation request sent to doctor:', doctor.id);
-    
-    toast({
-      title: 'Request Sent',
-      description: 'Waiting for doctor to accept...',
-    });
-    
-    // Listen for acceptance
-    socket.once('consultation_accepted', (data: any) => {
-      console.log('✅ Consultation accepted:', data);
-      if (data.consultationId === roomId) {
-        toast({
-          title: 'Call Accepted',
-          description: 'Connecting to doctor...',
-        });
-        setTimeout(() => {
-          window.location.href = `/call?room=${roomId}`;
-        }, 1000);
-      }
-    });
-    
-    socket.once('consultation_rejected', (data: any) => {
-      console.log('❌ Consultation rejected:', data);
-      if (data.consultationId === roomId) {
-        toast({
-          title: 'Request Rejected',
-          description: data.reason || 'Doctor is busy',
-          variant: 'destructive',
-        });
-      }
-    });
-    
-    // Timeout after 30 seconds
-    setTimeout(() => {
-      toast({
-        title: 'Request Timeout',
-        description: 'Doctor did not respond. Please try again.',
-        variant: 'destructive',
-      });
-    }, 30000);
   };
 
   if (loading) return <DashboardLayout><div className="text-center py-8">Loading...</div></DashboardLayout>;

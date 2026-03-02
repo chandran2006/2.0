@@ -50,20 +50,37 @@ public class UserService {
     }
     
     public List<User> getAvailableDoctors() {
-        return userRepository.findByRoleAndIsAvailable(User.Role.DOCTOR, true);
+        try {
+            List<User> doctors = userRepository.findByRoleAndIsAvailable(User.Role.DOCTOR, true);
+            System.out.println("[UserService] Found " + doctors.size() + " available doctors");
+            doctors.forEach(d -> System.out.println("  - Doctor: " + d.getName() + " (ID: " + d.getId() + ", Available: " + d.getIsAvailable() + ")"));
+            return doctors;
+        } catch (Exception e) {
+            System.err.println("[UserService] Error getting available doctors: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
     }
     
     public User updateAvailability(Long doctorId, Boolean isAvailable) {
         try {
-            System.out.println("Updating availability for doctor " + doctorId + " to " + isAvailable);
+            System.out.println("[UserService] Updating availability for doctor " + doctorId + " to " + isAvailable);
+            
             User doctor = userRepository.findById(doctorId)
                 .orElseThrow(() -> new RuntimeException("Doctor not found with id: " + doctorId));
+            
+            System.out.println("[UserService] Found doctor: " + doctor.getName() + ", Current availability: " + doctor.getIsAvailable());
+            
             doctor.setIsAvailable(isAvailable);
             User saved = userRepository.save(doctor);
-            System.out.println("Doctor availability updated successfully: " + saved.getIsAvailable());
+            
+            System.out.println("[UserService] Doctor availability updated successfully: " + saved.getIsAvailable());
+            System.out.println("[UserService] Saved doctor ID: " + saved.getId() + ", Name: " + saved.getName());
+            
             return saved;
         } catch (Exception e) {
-            System.err.println("Error updating availability: " + e.getMessage());
+            System.err.println("[UserService] Error updating availability: " + e.getMessage());
+            e.printStackTrace();
             throw e;
         }
     }

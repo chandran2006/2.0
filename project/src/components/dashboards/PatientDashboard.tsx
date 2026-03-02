@@ -41,15 +41,16 @@ const PatientDashboard: React.FC = () => {
 
   useEffect(() => {
     loadData();
-    socketService.connect();
-    socketService.on('doctor_online', handleDoctorOnline);
-    socketService.on('doctor_offline', handleDoctorOffline);
+    // Socket disabled - using Agora for calls
+    // socketService.connect();
+    // socketService.on('doctor_online', handleDoctorOnline);
+    // socketService.on('doctor_offline', handleDoctorOffline);
     
     const interval = setInterval(loadData, 3000);
     
     return () => {
-      socketService.off('doctor_online', handleDoctorOnline);
-      socketService.off('doctor_offline', handleDoctorOffline);
+      // socketService.off('doctor_online', handleDoctorOnline);
+      // socketService.off('doctor_offline', handleDoctorOffline);
       clearInterval(interval);
     };
   }, [user]);
@@ -66,7 +67,10 @@ const PatientDashboard: React.FC = () => {
       setAppointments(aptsRes.data || []);
       setPrescriptions(rxRes.data || []);
       setDoctors(docsRes.data || []);
-      setOnlineDoctors(availRes.data || []);
+      
+      // Handle available doctors response
+      const availDoctors = availRes.data?.doctors || availRes.data || [];
+      setOnlineDoctors(Array.isArray(availDoctors) ? availDoctors : []);
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
@@ -84,13 +88,22 @@ const PatientDashboard: React.FC = () => {
 
   const startConsultation = async (doctorId: string) => {
     try {
-      const roomId = `room_${user?.id}_${doctorId}_${Date.now()}`;
-      await callAPI.initiate({ patientId: user?.id, doctorId, roomId });
-      socketService.emit('consultation_request', { patientId: user?.id, doctorId, roomId });
-      setCallRoomId(roomId);
-      setCallOpen(true);
-      toast.success('Consultation request sent!');
+      // Create call invitation in backend
+      const response = await callAPI.initiate({
+        initiatorId: user?.id,
+        receiverId: doctorId,
+        callType: 'VIDEO'
+      });
+      
+      const callData = response.data;
+      const channelName = callData.channelName || `call-${callData.call.id}`;
+      
+      toast.success('Call invitation sent to doctor');
+      
+      // Navigate to video call
+      navigate(`/video-call?room=${channelName}&appointmentId=${callData.call.id}`);
     } catch (error) {
+      console.error('Failed to start consultation:', error);
       toast.error('Failed to start consultation');
     }
   };
@@ -235,7 +248,7 @@ const PatientDashboard: React.FC = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {onlineDoctors.slice(0, 3).map((doc) => (
+              {Array.isArray(onlineDoctors) && onlineDoctors.slice(0, 3).map((doc) => (
                 <div key={doc.id} className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
                   <div className="w-10 h-10 rounded-full bg-info flex items-center justify-center text-info-foreground font-bold text-sm">
                     {doc.name?.charAt(0) || 'D'}

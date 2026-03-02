@@ -83,6 +83,7 @@ const App = () => (
             
             {/* Call Routes */}
             <Route path="/call" element={<VideoCallPage />} />
+            <Route path="/video-call" element={<VideoCallPage />} />
             
             {/* Pharmacy Routes */}
             <Route path="/pharmacy/inventory" element={<InventoryPage />} />

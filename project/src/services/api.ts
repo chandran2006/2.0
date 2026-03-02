@@ -65,11 +65,22 @@ export const pharmacyAPI = {
 // Call APIs
 export const callAPI = {
   initiate: (data: any) => api.post('/calls/initiate', data),
+  acceptCall: (callId: number) => api.put(`/calls/${callId}/accept`),
+  rejectCall: (callId: number) => api.put(`/calls/${callId}/reject`),
+  endCall: (callId: number) => api.put(`/calls/${callId}/end`),
   doctorOnline: (doctorId: number) =>
     api.post('/calls/doctor/online', { doctorId }),
   doctorOffline: (doctorId: number) =>
     api.post('/calls/doctor/offline', { doctorId }),
   getAvailableDoctors: () => api.get('/calls/doctors/available'),
+  getIncomingCalls: (userId: number) => api.get(`/calls/incoming/${userId}`),
+  getAgoraToken: (channelName: string, userId: string, role: 'doctor' | 'patient') => {
+    const token = localStorage.getItem('token');
+    return api.get('/agora/token', {
+      params: { channelName, userId, role },
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  },
 };
 
 // Health Record APIs
