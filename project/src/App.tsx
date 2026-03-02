@@ -28,6 +28,10 @@ import PrescriptionsManagePage from "./pages/doctor/PrescriptionsManagePage";
 import DoctorAppointmentsPage from "./pages/doctor/AppointmentsPage";
 import ConsultationsPage from "./pages/doctor/ConsultationsPage";
 import SchedulePage from "./pages/doctor/SchedulePage";
+import DoctorConsultationPage from "./pages/doctor/ConsultationRequestsPage";
+
+// Call Pages
+import VideoCallPage from "./pages/VideoCallPage";
 
 // Pharmacy Pages
 import InventoryPage from "./pages/pharmacy/InventoryPage";
@@ -75,6 +79,10 @@ const App = () => (
             <Route path="/doctor/prescriptions" element={<PrescriptionsManagePage />} />
             <Route path="/doctor/consultations" element={<ConsultationsPage />} />
             <Route path="/doctor/schedule" element={<SchedulePage />} />
+            <Route path="/doctor/consultation-requests" element={<DoctorConsultationPage />} />
+            
+            {/* Call Routes */}
+            <Route path="/call" element={<VideoCallPage />} />
             
             {/* Pharmacy Routes */}
             <Route path="/pharmacy/inventory" element={<InventoryPage />} />

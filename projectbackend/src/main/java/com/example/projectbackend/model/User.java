@@ -1,5 +1,6 @@
 package com.example.projectbackend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -18,6 +19,7 @@ public class User {
     @Column(unique = true, nullable = false)
     private String email;
     
+    @JsonIgnore
     @Column(nullable = false)
     private String password;
     

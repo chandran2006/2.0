@@ -19,13 +19,39 @@ const SchedulePage: React.FC = () => {
   const [socket, setSocket] = useState<any>(null);
 
   useEffect(() => {
+    if (!user?.id) return;
+
     const newSocket = io(CALL_SERVER_URL);
     setSocket(newSocket);
 
+    // Load current availability status from backend
+    console.log('Loading doctor status for user:', user.id);
+    fetch(`http://localhost:8080/api/auth/current-user/${user.id}`)
+      .then(res => res.json())
+      .then(data => {
+        console.log('User data from DB:', data);
+        const isOnline = data.isAvailable === true;
+        setIsAvailable(isOnline);
+        console.log('Set toggle to:', isOnline);
+        
+        // Sync with socket server if online
+        if (isOnline) {
+          newSocket.emit('doctor_online', {
+            doctorId: user.id,
+            name: user.name,
+            specialization: user.specialization || 'General Physician',
+          });
+          console.log('Synced online status with socket server');
+        }
+      })
+      .catch(err => console.error('Failed to load status:', err));
+
     return () => {
+      // Only disconnect socket, don't change database status
+      console.log('Component unmounting, keeping status in DB');
       newSocket.disconnect();
     };
-  }, []);
+  }, [user]);
 
   const handleAvailabilityToggle = async (checked: boolean) => {
     try {
@@ -41,15 +67,14 @@ const SchedulePage: React.FC = () => {
 
       console.log('Updating doctor status:', { doctorId: user.id, checked });
 
-      // Update backend
-      let response;
+      // Update backend and local state
       if (checked) {
-        response = await callAPI.doctorOnline(user.id);
-        console.log('Doctor online response:', response.data);
+        await callAPI.doctorOnline(user.id);
       } else {
-        response = await callAPI.doctorOffline(user.id);
-        console.log('Doctor offline response:', response.data);
+        await callAPI.doctorOffline(user.id);
       }
+      
+      setIsAvailable(checked);
 
       // Update socket
       if (socket) {
@@ -70,7 +95,6 @@ const SchedulePage: React.FC = () => {
         console.warn('Socket not connected');
       }
 
-      setIsAvailable(checked);
       toast({
         title: 'Success',
         description: `You are now ${checked ? 'online' : 'offline'}`,

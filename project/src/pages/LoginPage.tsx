@@ -18,16 +18,25 @@ const LoginPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    
+    if (!email || !password) {
+      setError('Please enter both email and password');
+      return;
+    }
+    
     setLoading(true);
     try {
+      console.log('Submitting login for:', email);
       const success = await login(email, password);
       if (success) {
+        console.log('Login successful, navigating to dashboard');
         navigate('/dashboard');
       } else {
         setError('Invalid email or password. Please check your credentials.');
       }
-    } catch (err) {
-      setError('Unable to connect to server. Please ensure backend is running.');
+    } catch (err: any) {
+      console.error('Login error:', err);
+      setError('Unable to connect to server. Please ensure backend is running on port 8080.');
     } finally {
       setLoading(false);
     }

@@ -23,17 +23,30 @@ const DoctorDashboard: React.FC = () => {
 
   useEffect(() => {
     loadData();
+    loadOnlineStatus();
     socketService.connect();
     socketService.on('consultation_request', handleConsultationRequest);
     
     const interval = setInterval(loadData, 3000);
     
     return () => {
-      if (isOnline) toggleOnlineStatus(false);
       socketService.off('consultation_request', handleConsultationRequest);
       clearInterval(interval);
     };
   }, [user]);
+
+  const loadOnlineStatus = async () => {
+    if (!user?.id) return;
+    try {
+      const response = await fetch(`http://localhost:8080/api/auth/current-user/${user.id}`);
+      const data = await response.json();
+      const isOnline = data.isAvailable === true;
+      setIsOnline(isOnline);
+      console.log('Dashboard loaded doctor status:', isOnline);
+    } catch (error) {
+      console.error('Failed to load online status:', error);
+    }
+  };
 
   const loadData = async () => {
     if (!user?.id) return;

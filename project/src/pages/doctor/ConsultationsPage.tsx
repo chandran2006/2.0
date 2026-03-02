@@ -3,9 +3,11 @@ import { Video, Phone, MessageSquare, Clock, User } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/shared/DashboardLayout';
 
 const ConsultationsPage: React.FC = () => {
+  const navigate = useNavigate();
   const consultations = [
     { id: 1, patientName: 'Ramesh Kumar', type: 'Video', status: 'Scheduled', time: '2024-01-15 10:00 AM', duration: '30 min' },
     { id: 2, patientName: 'Sunita Devi', type: 'Phone', status: 'Completed', time: '2024-01-14 02:00 PM', duration: '20 min' },
@@ -19,9 +21,17 @@ const ConsultationsPage: React.FC = () => {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <div>
-          <h1 className="font-display text-2xl font-bold">Consultations</h1>
-          <p className="text-muted-foreground mt-1">Manage video and phone consultations</p>
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="font-display text-2xl font-bold">Consultations</h1>
+            <p className="text-muted-foreground mt-1">Manage video and phone consultations</p>
+          </div>
+          <Button 
+            className="bg-gradient-primary"
+            onClick={() => navigate('/doctor/consultation-requests')}
+          >
+            View Requests
+          </Button>
         </div>
 
         <div className="grid gap-4">

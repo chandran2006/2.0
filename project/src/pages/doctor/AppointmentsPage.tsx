@@ -15,6 +15,13 @@ const DoctorAppointmentsPage: React.FC = () => {
 
   useEffect(() => {
     loadAppointments();
+    
+    // Auto-refresh every 10 seconds
+    const interval = setInterval(() => {
+      loadAppointments();
+    }, 10000);
+    
+    return () => clearInterval(interval);
   }, [user]);
 
   const loadAppointments = () => {

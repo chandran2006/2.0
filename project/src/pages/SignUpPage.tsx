@@ -27,16 +27,30 @@ const SignUpPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    
+    if (!name || !email || !password) {
+      setError('Please fill in all fields');
+      return;
+    }
+    
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters');
+      return;
+    }
+    
     setLoading(true);
     try {
+      console.log('Submitting registration:', { name, email, role });
       const success = await register(name, email, password, role);
       if (success) {
+        console.log('Registration successful, navigating to dashboard');
         navigate('/dashboard');
       } else {
-        setError('Registration failed. Please try again.');
+        setError('Registration failed. Email may already be registered.');
       }
-    } catch (err) {
-      setError('Unable to connect to server. Please ensure backend is running.');
+    } catch (err: any) {
+      console.error('Registration error:', err);
+      setError('Unable to connect to server. Please ensure backend is running on port 8080.');
     } finally {
       setLoading(false);
     }

@@ -13,13 +13,24 @@ const PrescriptionsPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    loadPrescriptions();
+    
+    // Auto-refresh every 15 seconds
+    const interval = setInterval(() => {
+      loadPrescriptions();
+    }, 15000);
+    
+    return () => clearInterval(interval);
+  }, [user]);
+
+  const loadPrescriptions = () => {
     if (user?.id) {
       prescriptionAPI.getPatientPrescriptions(parseInt(user.id))
         .then(res => setPrescriptions(res.data))
         .catch(err => console.error(err))
         .finally(() => setLoading(false));
     }
-  }, [user]);
+  };
 
   if (loading) return <DashboardLayout><div className="text-center py-8">Loading...</div></DashboardLayout>;
 

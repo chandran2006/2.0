@@ -48,19 +48,34 @@ public class AuthController {
     
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> credentials) {
-        String email = credentials.get("email");
-        String password = credentials.get("password");
-        System.out.println("Login attempt for: " + email);
-        
-        return userService.login(email, password)
-                .map(user -> {
-                    System.out.println("Login successful for: " + email);
-                    return ResponseEntity.ok(Map.of("user", user, "message", "Login successful"));
-                })
-                .orElseGet(() -> {
-                    System.err.println("Login failed for: " + email);
-                    return ResponseEntity.status(401).body(Map.of("message", "Invalid credentials"));
-                });
+        try {
+            String email = credentials.get("email");
+            String password = credentials.get("password");
+            
+            System.out.println("=== Login Request ===");
+            System.out.println("Email: " + email);
+            
+            if (email == null || email.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("message", "Email is required"));
+            }
+            if (password == null || password.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("message", "Password is required"));
+            }
+            
+            return userService.login(email, password)
+                    .map(user -> {
+                        System.out.println("Login successful for: " + email + " (ID: " + user.getId() + ")");
+                        return ResponseEntity.ok(Map.of("user", user, "message", "Login successful"));
+                    })
+                    .orElseGet(() -> {
+                        System.err.println("Login failed - Invalid credentials for: " + email);
+                        return ResponseEntity.status(401).body(Map.of("message", "Invalid email or password"));
+                    });
+        } catch (Exception e) {
+            System.err.println("Login error: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(Map.of("message", "Login failed: " + e.getMessage()));
+        }
     }
     
     @GetMapping("/current-user/{id}")
