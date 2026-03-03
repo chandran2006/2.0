@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
 
 export interface AgoraTokenResponse {
   token: string;
@@ -16,7 +16,7 @@ export const getAgoraToken = async (
   const token = localStorage.getItem('token');
   
   const response = await axios.get<AgoraTokenResponse>(
-    `${API_URL}/agora/token`,
+    `${API_URL.replace('/api', '')}/api/agora/token`,
     {
       params: { channelName, userId, role },
       headers: {

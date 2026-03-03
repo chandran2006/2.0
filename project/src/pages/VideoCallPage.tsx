@@ -17,7 +17,7 @@ const VideoCallPage: React.FC = () => {
     return null;
   }
 
-  const channelName = appointmentId || roomId;
+  const channelName = roomId;
   const userId = String(user.id);
   const userRole = user.role.toLowerCase() === 'doctor' ? 'doctor' : 'patient';
 

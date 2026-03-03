@@ -7,7 +7,7 @@ import AgoraRTC, {
 } from 'agora-rtc-sdk-ng';
 import { getAgoraToken } from '../services/agoraService';
 
-const APP_ID = '11ab8951ac914836a96affca6b87bae7';
+const APP_ID = 'fec296083f304452b43d718b2aaa9d00';
 
 interface VideoCallProps {
   channelName: string;
