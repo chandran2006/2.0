@@ -8,23 +8,15 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { callAPI } from '@/services/api';
 import DashboardLayout from '@/components/shared/DashboardLayout';
-import io from 'socket.io-client';
-
-const CALL_SERVER_URL = 'http://localhost:5002';
 
 const SchedulePage: React.FC = () => {
   const [isAvailable, setIsAvailable] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
-  const [socket, setSocket] = useState<any>(null);
 
   useEffect(() => {
     if (!user?.id) return;
 
-    const newSocket = io(CALL_SERVER_URL);
-    setSocket(newSocket);
-
-    // Load current availability status from backend
     console.log('Loading doctor status for user:', user.id);
     fetch(`http://localhost:8080/api/auth/current-user/${user.id}`)
       .then(res => res.json())
@@ -33,24 +25,8 @@ const SchedulePage: React.FC = () => {
         const isOnline = data.isAvailable === true;
         setIsAvailable(isOnline);
         console.log('Set toggle to:', isOnline);
-        
-        // Sync with socket server if online
-        if (isOnline) {
-          newSocket.emit('doctor_online', {
-            doctorId: user.id,
-            name: user.name,
-            specialization: user.specialization || 'General Physician',
-          });
-          console.log('Synced online status with socket server');
-        }
       })
       .catch(err => console.error('Failed to load status:', err));
-
-    return () => {
-      // Only disconnect socket, don't change database status
-      console.log('Component unmounting, keeping status in DB');
-      newSocket.disconnect();
-    };
   }, [user]);
 
   const handleAvailabilityToggle = async (checked: boolean) => {
@@ -67,7 +43,6 @@ const SchedulePage: React.FC = () => {
 
       console.log('Updating doctor status:', { doctorId: user.id, checked });
 
-      // Update backend and local state
       if (checked) {
         await callAPI.doctorOnline(user.id);
       } else {
@@ -75,25 +50,6 @@ const SchedulePage: React.FC = () => {
       }
       
       setIsAvailable(checked);
-
-      // Update socket
-      if (socket) {
-        if (checked) {
-          socket.emit('doctor_online', {
-            doctorId: user.id,
-            name: user.name,
-            specialization: user.specialization || 'General Physician',
-          });
-          console.log('Emitted doctor_online event');
-        } else {
-          socket.emit('doctor_offline', {
-            doctorId: user.id,
-          });
-          console.log('Emitted doctor_offline event');
-        }
-      } else {
-        console.warn('Socket not connected');
-      }
 
       toast({
         title: 'Success',

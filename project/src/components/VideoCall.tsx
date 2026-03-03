@@ -36,8 +36,12 @@ export const VideoCall: React.FC<VideoCallProps> = ({
 
   const clientRef = useRef<IAgoraRTCClient | null>(null);
   const localVideoRef = useRef<HTMLDivElement>(null);
+  const isInitializing = useRef(false);
 
   useEffect(() => {
+    if (isInitializing.current) return;
+    isInitializing.current = true;
+
     const init = async () => {
       const client = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
       clientRef.current = client;
@@ -68,31 +72,88 @@ export const VideoCall: React.FC<VideoCallProps> = ({
       });
 
       try {
-        const agoraToken = token || (await getAgoraToken(channelName, userId, userRole)).token;
-
-        await client.join(APP_ID, channelName, agoraToken, parseInt(userId));
-
-        const [audioTrack, videoTrack] = await AgoraRTC.createMicrophoneAndCameraTracks();
+        console.log('=== Agora Join Debug ===' );
+        console.log('Channel:', channelName);
+        console.log('User ID:', userId);
+        console.log('Role:', userRole);
+        console.log('Token provided:', !!token);
         
-        setLocalTracks({ audioTrack, videoTrack });
+        let agoraToken = token;
+        if (!agoraToken) {
+          console.log('Fetching token from backend...');
+          const response = await getAgoraToken(channelName, userId, userRole);
+          agoraToken = response.token;
+          if (!agoraToken) {
+            console.log('No token received - using null (testing mode)');
+          } else {
+            console.log('Received token:', agoraToken?.substring(0, 20) + '...');
+          }
+        }
+        
+        const uid = parseInt(userId) || 0;
+        console.log('Parsed UID:', uid);
+        console.log('App ID being used:', APP_ID);
+        console.log('App ID type:', typeof APP_ID);
+        console.log('App ID length:', APP_ID?.length);
+        console.log('Attempting to join...');
 
-        if (localVideoRef.current) {
-          videoTrack.play(localVideoRef.current);
+        if (!APP_ID || APP_ID.trim() === '') {
+          throw new Error('App ID is empty or undefined');
         }
 
-        await client.publish([audioTrack, videoTrack]);
-        setIsJoined(true);
-      } catch (error) {
+        await client.join(APP_ID, channelName, agoraToken, uid);
+        console.log('✓ Successfully joined channel');
+
+        console.log('Requesting camera and microphone permissions...');
+        try {
+          const [audioTrack, videoTrack] = await AgoraRTC.createMicrophoneAndCameraTracks(
+            { AEC: true, ANS: true },
+            { encoderConfig: '480p_1' }
+          );
+          console.log('✓ Got media tracks - Audio:', !!audioTrack, 'Video:', !!videoTrack);
+          
+          setLocalTracks({ audioTrack, videoTrack });
+
+          if (localVideoRef.current) {
+            videoTrack.play(localVideoRef.current);
+            console.log('✓ Playing local video');
+          }
+
+          await client.publish([audioTrack, videoTrack]);
+          console.log('✓ Published tracks');
+          setIsJoined(true);
+        } catch (mediaError: any) {
+          console.error('Media access error:', mediaError);
+          alert(`Camera/Microphone access denied: ${mediaError.message}\n\nPlease allow camera and microphone permissions in your browser settings.`);
+          throw mediaError;
+        }
+      } catch (error: any) {
         console.error('Failed to join channel:', error);
+        console.error('Error name:', error.name);
+        console.error('Error message:', error.message);
+        console.error('Error code:', error.code);
+        alert(`Failed to join call: ${error.message}`);
       }
     };
 
     init();
 
     return () => {
-      handleLeave();
+      isInitializing.current = false;
+      const cleanup = async () => {
+        if (localTracks.audioTrack) {
+          localTracks.audioTrack.close();
+        }
+        if (localTracks.videoTrack) {
+          localTracks.videoTrack.close();
+        }
+        if (clientRef.current) {
+          await clientRef.current.leave();
+        }
+      };
+      cleanup();
     };
-  }, [channelName, userId, userRole]);
+  }, []);
 
   useEffect(() => {
     remoteUsers.forEach((user) => {
@@ -126,7 +187,11 @@ export const VideoCall: React.FC<VideoCallProps> = ({
     }
 
     if (clientRef.current) {
-      await clientRef.current.leave();
+      try {
+        await clientRef.current.leave();
+      } catch (e) {
+        console.log('Leave error (ignored):', e);
+      }
     }
 
     setIsJoined(false);

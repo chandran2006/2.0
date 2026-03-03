@@ -9,7 +9,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { appointmentAPI, prescriptionAPI, callAPI } from '@/services/api';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import socketService from '@/services/socket';
 
 const DoctorDashboard: React.FC = () => {
   const { user } = useAuth();
@@ -25,15 +24,8 @@ const DoctorDashboard: React.FC = () => {
   useEffect(() => {
     loadData();
     loadOnlineStatus();
-    socketService.connect();
-    socketService.on('consultation_request', handleConsultationRequest);
-    
     const interval = setInterval(loadData, 3000);
-    
-    return () => {
-      socketService.off('consultation_request', handleConsultationRequest);
-      clearInterval(interval);
-    };
+    return () => clearInterval(interval);
   }, [user]);
 
   const loadOnlineStatus = async () => {
@@ -75,11 +67,9 @@ const DoctorDashboard: React.FC = () => {
     try {
       if (status) {
         await callAPI.doctorOnline(parseInt(user?.id || '0'));
-        socketService.emit('doctor_online', { doctorId: user?.id, name: user?.name, specialization: user?.specialization });
         toast.success('You are now online');
       } else {
         await callAPI.doctorOffline(parseInt(user?.id || '0'));
-        socketService.emit('doctor_offline', { doctorId: user?.id });
         toast.info('You are now offline');
       }
     } catch (error) {

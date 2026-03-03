@@ -10,7 +10,6 @@ import { BookAppointmentDialog } from '@/components/shared/BookAppointmentDialog
 import { VideoCall } from '@/components/shared/VideoCall';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import socketService from '@/services/socket';
 
 const healthMetrics = [
   { label: 'Heart Rate', value: '72', unit: 'bpm', icon: Heart, trend: 'stable' as const, color: 'text-destructive' },
@@ -41,18 +40,8 @@ const PatientDashboard: React.FC = () => {
 
   useEffect(() => {
     loadData();
-    // Socket disabled - using Agora for calls
-    // socketService.connect();
-    // socketService.on('doctor_online', handleDoctorOnline);
-    // socketService.on('doctor_offline', handleDoctorOffline);
-    
     const interval = setInterval(loadData, 3000);
-    
-    return () => {
-      // socketService.off('doctor_online', handleDoctorOnline);
-      // socketService.off('doctor_offline', handleDoctorOffline);
-      clearInterval(interval);
-    };
+    return () => clearInterval(interval);
   }, [user]);
 
   const loadData = async () => {

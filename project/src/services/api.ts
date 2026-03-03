@@ -74,13 +74,8 @@ export const callAPI = {
     api.post('/calls/doctor/offline', { doctorId }),
   getAvailableDoctors: () => api.get('/calls/doctors/available'),
   getIncomingCalls: (userId: number) => api.get(`/calls/incoming/${userId}`),
-  getAgoraToken: (channelName: string, userId: string, role: 'doctor' | 'patient') => {
-    const token = localStorage.getItem('token');
-    return api.get('/agora/token', {
-      params: { channelName, userId, role },
-      headers: { Authorization: `Bearer ${token}` },
-    });
-  },
+  getAgoraToken: (channelName: string, userId: string, role: 'doctor' | 'patient') =>
+    api.get('/agora/token', { params: { channelName, userId, role } }),
 };
 
 // Health Record APIs

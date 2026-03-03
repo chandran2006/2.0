@@ -21,7 +21,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = useCallback(async (email: string, password: string): Promise<boolean> => {
     try {
       console.log('Attempting login for:', email);
-      console.log('API URL:', import.meta.env.VITE_API_URL || 'http://localhost:8080/api');
       const response = await authAPI.login(email, password);
       console.log('Login response:', response.data);
       if (response.data && response.data.user) {
@@ -46,8 +45,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return false;
     } catch (error: any) {
       console.error('Login error:', error);
-      console.error('Error details:', error.response?.data || error.message);
-      console.error('Error status:', error.response?.status);
       return false;
     }
   }, []);
@@ -55,7 +52,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const register = useCallback(async (name: string, email: string, password: string, role: UserRole): Promise<boolean> => {
     try {
       console.log('Attempting registration for:', email, 'as', role);
-      console.log('API URL:', import.meta.env.VITE_API_URL || 'http://localhost:8080/api');
       const response = await authAPI.register({ name, email, password, role });
       console.log('Registration response:', response.data);
       if (response.data && response.data.user) {
@@ -77,8 +73,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return false;
     } catch (error: any) {
       console.error('Registration error:', error);
-      console.error('Error details:', error.response?.data || error.message);
-      console.error('Error status:', error.response?.status);
       return false;
     }
   }, []);

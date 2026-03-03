@@ -23,13 +23,8 @@ public class AgoraController {
     public ResponseEntity<Map<String, String>> generateToken(
             @RequestParam String channelName,
             @RequestParam String userId,
-            @RequestParam(defaultValue = "patient") String role,
-            Authentication authentication
+            @RequestParam(defaultValue = "patient") String role
     ) {
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return ResponseEntity.status(401).build();
-        }
-
         String token = agoraService.generateRtcToken(channelName, userId, role);
 
         Map<String, String> response = new HashMap<>();

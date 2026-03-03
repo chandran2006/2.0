@@ -1,58 +1,38 @@
-# Network Configuration Summary
+# Network Access Setup Instructions
 
-## ✅ Configuration Complete
+## On Host Machine (192.168.29.145):
 
-### Backend (Laptop 1)
-**application.properties**
-```properties
-server.address=0.0.0.0
-```
-- Binds to all network interfaces
-- MySQL stays on localhost:3306
+1. Start Backend:
+   cd projectbackend
+   mvnw spring-boot:run
 
-**CorsConfig.java**
-```java
-.allowedOriginPatterns("http://localhost:*", "http://192.168.*.*:*")
-```
-- Accepts requests from any device on 192.168.x.x network
+2. Start Frontend:
+   cd project
+   npm run dev
+   (Frontend will be accessible at http://192.168.29.145:5173)
 
-### Frontend (Both Laptops)
-**.env**
-```
-VITE_API_URL=http://192.168.29.145:8080/api
-VITE_SOCKET_URL=http://192.168.29.145:5002
-```
+3. Start Call Server:
+   cd call-server
+   npm start
 
-### Access URLs
-- **Laptop 1**: http://localhost:5173 or http://192.168.29.145:5173
-- **Laptop 2**: http://192.168.29.145:5173
+## On External Device:
 
-## 🚀 Start Services
+1. Connect to same WiFi network
+2. Open browser and go to: http://192.168.29.145:5173
+3. Login with demo accounts:
+   - Patient: patient1@teleasha.com / password123
+   - Doctor: dr.sharma@teleasha.com / password123
 
-### Laptop 1
-```bash
-# Terminal 1 - Backend
-cd projectbackend
-mvnw spring-boot:run
+## Firewall Rules (if needed):
 
-# Terminal 2 - Frontend
-cd project
-npm run dev -- --host
-
-# Terminal 3 - Call Server
-cd call-server
-npm start
-```
-
-## 🔥 Firewall (Windows)
-If still blocked, allow ports:
-```powershell
+Run as Administrator:
 netsh advfirewall firewall add rule name="Spring Boot" dir=in action=allow protocol=TCP localport=8080
 netsh advfirewall firewall add rule name="Vite Dev" dir=in action=allow protocol=TCP localport=5173
 netsh advfirewall firewall add rule name="Call Server" dir=in action=allow protocol=TCP localport=5002
-```
 
-## ✅ Test
-From Laptop 2:
-- http://192.168.29.145:8080/api/appointments/doctors
-- http://192.168.29.145:5173
+## Troubleshooting:
+
+1. Verify IP: ipconfig
+2. Test backend: http://192.168.29.145:8080/api/auth/test-db
+3. Check firewall: netsh advfirewall show allprofiles
+4. Restart all services after changes
