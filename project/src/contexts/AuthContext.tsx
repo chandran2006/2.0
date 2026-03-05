@@ -45,6 +45,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return false;
     } catch (error: any) {
       console.error('Login error:', error);
+      if (error.response?.status === 403) {
+        throw new Error(error.response.data.message || 'Your account has been blocked. Please contact the administrator.');
+      }
       return false;
     }
   }, []);

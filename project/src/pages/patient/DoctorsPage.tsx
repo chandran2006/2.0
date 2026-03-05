@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Star, Calendar, Search, Video } from 'lucide-react';
+import { Star, Calendar, Search, Video, Clock, X } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,6 +8,7 @@ import { appointmentAPI, callAPI } from '@/services/api';
 import { BookAppointmentDialog } from '@/components/shared/BookAppointmentDialog';
 import { useAuth } from '@/contexts/AuthContext';
 import DashboardLayout from '@/components/shared/DashboardLayout';
+import { useNavigate } from 'react-router-dom';
 
 const DoctorsPage: React.FC = () => {
   const [doctors, setDoctors] = useState<any[]>([]);
@@ -15,14 +16,47 @@ const DoctorsPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [bookingOpen, setBookingOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [socket, setSocket] = useState<Socket | null>(null);
+  const [waitingForDoctor, setWaitingForDoctor] = useState(false);
+  const [currentCallId, setCurrentCallId] = useState<number | null>(null);
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     loadDoctors();
-    // Socket disabled - using Agora for calls
   }, [user, toast]);
+
+  useEffect(() => {
+    let interval: any;
+    if (waitingForDoctor && currentCallId) {
+      interval = setInterval(async () => {
+        try {
+          const response = await callAPI.getCallStatus(currentCallId);
+          const call = response.data;
+          
+          if (call.status === 'ACCEPTED') {
+            clearInterval(interval);
+            setWaitingForDoctor(false);
+            const channelName = `call-${call.id}`;
+            const tokenResponse = await callAPI.getAgoraToken(channelName, user!.id, 'patient');
+            navigate(`/video-call?room=${channelName}&appointmentId=${call.id}&token=${tokenResponse.data.token}`);
+          } else if (call.status === 'REJECTED') {
+            clearInterval(interval);
+            setWaitingForDoctor(false);
+            setCurrentCallId(null);
+            toast({
+              title: 'Call Rejected',
+              description: 'Doctor is not available right now',
+              variant: 'destructive',
+            });
+          }
+        } catch (error) {
+          console.error('Error checking call status:', error);
+        }
+      }, 2000);
+    }
+    return () => clearInterval(interval);
+  }, [waitingForDoctor, currentCallId, user, navigate, toast]);
 
   useEffect(() => {
     if (searchQuery) {
@@ -45,37 +79,68 @@ const DoctorsPage: React.FC = () => {
       .finally(() => setLoading(false));
   };
 
-  const handleInstantConsultation = (doctor: any) => {
-    // Create call invitation via backend
-    callAPI.initiate({
-      initiatorId: user?.id,
-      receiverId: doctor.id,
-      callType: 'VIDEO'
-    }).then(response => {
-      const callData = response.data;
-      const channelName = callData.channelName;
-      const token = callData.initiatorToken;
-      
-      toast({
-        title: 'Call Started',
-        description: 'Connecting to doctor...',
+  const handleInstantConsultation = async (doctor: any) => {
+    try {
+      const response = await callAPI.initiate({
+        initiatorId: user?.id,
+        receiverId: doctor.id,
+        callType: 'VIDEO'
       });
       
-      window.location.href = `/video-call?room=${channelName}&appointmentId=${callData.call.id}&token=${token}`;
-    }).catch(error => {
+      const callData = response.data;
+      setCurrentCallId(callData.call.id);
+      setWaitingForDoctor(true);
+      
+      toast({
+        title: 'Call Request Sent',
+        description: 'Waiting for doctor to accept...',
+      });
+    } catch (error) {
       console.error('Failed to initiate call:', error);
       toast({
         title: 'Call Failed',
         description: 'Unable to start call. Please try again.',
         variant: 'destructive',
       });
-    });
+    }
+  };
+
+  const cancelCallRequest = async () => {
+    if (currentCallId) {
+      try {
+        await callAPI.rejectCall(currentCallId);
+        setWaitingForDoctor(false);
+        setCurrentCallId(null);
+        toast({
+          title: 'Call Cancelled',
+          description: 'Call request has been cancelled',
+        });
+      } catch (error) {
+        console.error('Failed to cancel call:', error);
+      }
+    }
   };
 
   if (loading) return <DashboardLayout><div className="text-center py-8">Loading...</div></DashboardLayout>;
 
   return (
     <DashboardLayout>
+      {waitingForDoctor && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center">
+          <Card className="max-w-md mx-4">
+            <CardContent className="p-8 text-center">
+              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+                <Clock className="w-8 h-8 text-primary" />
+              </div>
+              <h3 className="text-xl font-bold mb-2">Waiting for Doctor</h3>
+              <p className="text-muted-foreground mb-6">Your call request has been sent. Please wait for the doctor to accept.</p>
+              <Button onClick={cancelCallRequest} variant="outline" className="text-destructive">
+                <X className="w-4 h-4 mr-2" /> Cancel Request
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      )}
       <div className="space-y-6">
       <div>
         <h1 className="font-display text-2xl font-bold">Find Doctors</h1>

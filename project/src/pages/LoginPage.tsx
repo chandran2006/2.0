@@ -36,7 +36,11 @@ const LoginPage: React.FC = () => {
       }
     } catch (err: any) {
       console.error('Login error:', err);
-      setError('Unable to connect to server. Please ensure backend is running on port 8080.');
+      if (err.message && err.message.includes('blocked')) {
+        setError(err.message);
+      } else {
+        setError('Unable to connect to server. Please ensure backend is running on port 8080.');
+      }
     } finally {
       setLoading(false);
     }

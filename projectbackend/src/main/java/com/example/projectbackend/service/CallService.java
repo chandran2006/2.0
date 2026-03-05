@@ -45,6 +45,10 @@ public class CallService {
         return callRepository.save(call);
     }
     
+    public Call getCall(Long callId) {
+        return callRepository.findById(callId).orElseThrow();
+    }
+    
     public List<Call> getIncomingCalls(Long userId) {
         return callRepository.findByReceiverIdAndStatus(userId, Call.Status.RINGING);
     }

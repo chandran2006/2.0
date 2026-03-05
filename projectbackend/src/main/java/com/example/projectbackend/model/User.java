@@ -34,6 +34,7 @@ public class User {
     private String licenseNumber;
     private String pharmacyName;
     private Boolean isAvailable = false;
+    private Boolean blocked = false;
     
     @Column(updatable = false)
     private LocalDateTime createdAt;
@@ -46,6 +47,9 @@ public class User {
         updatedAt = LocalDateTime.now();
         if (isAvailable == null) {
             isAvailable = false;
+        }
+        if (blocked == null) {
+            blocked = false;
         }
     }
     

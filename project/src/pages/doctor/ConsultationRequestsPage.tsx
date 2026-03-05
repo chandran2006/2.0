@@ -36,10 +36,9 @@ const DoctorConsultationPage: React.FC = () => {
 
   const acceptRequest = async (request: any) => {
     try {
-      const response = await callAPI.acceptCall(request.id);
+      await callAPI.acceptCall(request.id);
       const channelName = `call-${request.id}`;
       
-      // Get token for doctor
       const tokenResponse = await callAPI.getAgoraToken(channelName, user!.id, 'doctor');
       
       toast({

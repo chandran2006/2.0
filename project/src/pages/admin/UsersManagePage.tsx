@@ -1,21 +1,65 @@
-import React, { useState } from 'react';
-import { Users, Shield, Stethoscope, Building2, Search, UserPlus } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Users, Shield, Stethoscope, Building2, Search, UserPlus, Ban, CheckCircle, AlertCircle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import DashboardLayout from '@/components/shared/DashboardLayout';
+import { adminAPI } from '@/services/api';
+import { useToast } from '@/components/ui/use-toast';
+
+interface User {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+  blocked: boolean;
+}
 
 const UsersManagePage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
-  const users = [
-    { id: 1, name: 'Ramesh Kumar', email: 'ramesh@example.com', role: 'PATIENT', status: 'active' },
-    { id: 2, name: 'Dr. Priya Sharma', email: 'priya@example.com', role: 'DOCTOR', status: 'active' },
-    { id: 3, name: 'MedPlus Pharmacy', email: 'medplus@example.com', role: 'PHARMACY', status: 'active' },
-    { id: 4, name: 'Sunita Devi', email: 'sunita@example.com', role: 'PATIENT', status: 'active' },
-    { id: 5, name: 'Dr. Amit Singh', email: 'amit@example.com', role: 'DOCTOR', status: 'inactive' },
-  ];
+  useEffect(() => {
+    loadUsers();
+  }, []);
+
+  const loadUsers = async () => {
+    try {
+      console.log('Loading users...');
+      const response = await adminAPI.getAllUsers();
+      console.log('Users response:', response.data);
+      setUsers(response.data || []);
+    } catch (error: any) {
+      console.error('Failed to load users:', error);
+      toast({
+        title: 'Error',
+        description: error.response?.data?.message || 'Failed to load users',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleToggleBlock = async (userId: number, currentStatus: boolean) => {
+    try {
+      await adminAPI.toggleBlockUser(userId);
+      toast({
+        title: 'Success',
+        description: `User ${currentStatus ? 'unblocked' : 'blocked'} successfully`,
+      });
+      loadUsers();
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to update user status',
+        variant: 'destructive',
+      });
+    }
+  };
 
   const filteredUsers = users.filter(u =>
     u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -51,6 +95,17 @@ const UsersManagePage: React.FC = () => {
             <UserPlus className="w-4 h-4 mr-1" /> Add User
           </Button>
         </div>
+
+        {loading ? (
+          <div className="text-center py-8">
+            <p className="text-muted-foreground">Loading users...</p>
+          </div>
+        ) : users.length === 0 ? (
+          <div className="text-center py-8">
+            <p className="text-muted-foreground">No users found in database. Please register some users first.</p>
+          </div>
+        ) : (
+          <>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card className="shadow-card">
@@ -121,31 +176,45 @@ const UsersManagePage: React.FC = () => {
         </div>
 
         <div className="space-y-3">
-          {filteredUsers.map((user) => {
-            const Icon = getRoleIcon(user.role);
-            return (
-              <Card key={user.id} className="shadow-card hover:shadow-card-hover transition-shadow">
-                <CardContent className="p-4 flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                    <Icon className="w-6 h-6 text-primary" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-medium">{user.name}</p>
-                    <p className="text-sm text-muted-foreground">{user.email}</p>
-                  </div>
-                  <Badge>{user.role}</Badge>
-                  <Badge variant={user.status === 'active' ? 'default' : 'secondary'}>
-                    {user.status}
-                  </Badge>
-                  <Button size="sm" variant="outline">Manage</Button>
-                </CardContent>
-              </Card>
-            );
-          })}
+          {loading ? (
+            <p className="text-center text-muted-foreground py-8">Loading users...</p>
+          ) : filteredUsers.length === 0 ? (
+            <p className="text-center text-muted-foreground py-8">No users found</p>
+          ) : (
+            filteredUsers.map((user) => {
+              const Icon = getRoleIcon(user.role);
+              return (
+                <Card key={user.id} className="shadow-card hover:shadow-card-hover transition-shadow">
+                  <CardContent className="p-4 flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                      <Icon className="w-6 h-6 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium">{user.name}</p>
+                      <p className="text-sm text-muted-foreground">{user.email}</p>
+                    </div>
+                    <Badge>{user.role}</Badge>
+                    <Badge variant={user.blocked ? 'destructive' : 'default'}>
+                      {user.blocked ? 'Blocked' : 'Active'}
+                    </Badge>
+                    <Button 
+                      size="sm" 
+                      variant={user.blocked ? 'default' : 'destructive'}
+                      onClick={() => handleToggleBlock(user.id, user.blocked)}
+                    >
+                      {user.blocked ? (
+                        <><CheckCircle className="w-4 h-4 mr-1" /> Unblock</>
+                      ) : (
+                        <><Ban className="w-4 h-4 mr-1" /> Block</>
+                      )}
+                    </Button>
+                  </CardContent>
+                </Card>
+              );
+            })
+          )}
         </div>
-
-        {filteredUsers.length === 0 && (
-          <p className="text-center text-muted-foreground py-8">No users found</p>
+          </>
         )}
       </div>
     </DashboardLayout>

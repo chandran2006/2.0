@@ -4,12 +4,20 @@ import { Users, Stethoscope, FileText, Activity, Server, TrendingUp } from 'luci
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { appointmentAPI, prescriptionAPI } from '@/services/api';
+import { adminAPI, appointmentAPI, prescriptionAPI } from '@/services/api';
 import { useNavigate } from 'react-router-dom';
 
 const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
-  const [stats, setStats] = useState({ users: 0, consultations: 0, prescriptions: 0, uptime: '99.9%' });
+  const [stats, setStats] = useState({ 
+    totalUsers: 0, 
+    patients: 0,
+    doctors: 0,
+    pharmacies: 0,
+    consultations: 0, 
+    prescriptions: 0, 
+    uptime: '99.9%' 
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -20,12 +28,18 @@ const AdminDashboard: React.FC = () => {
 
   const loadData = async () => {
     try {
-      const [aptsRes, rxRes] = await Promise.all([
+      const [usersRes, aptsRes, rxRes] = await Promise.all([
+        adminAPI.getAllUsers(),
         appointmentAPI.getDoctors(),
         prescriptionAPI.getPatientPrescriptions(1)
       ]);
+      
+      const users = usersRes.data || [];
       setStats({
-        users: aptsRes.data?.length || 0,
+        totalUsers: users.length,
+        patients: users.filter((u: any) => u.role === 'PATIENT').length,
+        doctors: users.filter((u: any) => u.role === 'DOCTOR').length,
+        pharmacies: users.filter((u: any) => u.role === 'PHARMACY').length,
         consultations: 0,
         prescriptions: rxRes.data?.length || 0,
         uptime: '99.9%'
@@ -38,17 +52,17 @@ const AdminDashboard: React.FC = () => {
   };
 
   const systemStats = [
-    { label: 'Total Users', value: stats.users.toString(), icon: Users, color: 'text-primary', bg: 'bg-primary/10' },
+    { label: 'Total Users', value: stats.totalUsers.toString(), icon: Users, color: 'text-primary', bg: 'bg-primary/10' },
     { label: 'Consultations', value: stats.consultations.toString(), icon: Stethoscope, color: 'text-info', bg: 'bg-info/10' },
     { label: 'Prescriptions', value: stats.prescriptions.toString(), icon: FileText, color: 'text-success', bg: 'bg-success/10' },
     { label: 'Uptime', value: stats.uptime, icon: Activity, color: 'text-warning', bg: 'bg-warning/10' },
   ];
 
   const userBreakdown = [
-    { role: 'Patients', count: 650, color: 'bg-primary' },
-    { role: 'Doctors', count: 120, color: 'bg-info' },
-    { role: 'Pharmacies', count: 45, color: 'bg-success' },
-    { role: 'Admins', count: 5, color: 'bg-accent' },
+    { role: 'Patients', count: stats.patients, color: 'bg-primary' },
+    { role: 'Doctors', count: stats.doctors, color: 'bg-info' },
+    { role: 'Pharmacies', count: stats.pharmacies, color: 'bg-success' },
+    { role: 'Admins', count: stats.totalUsers - stats.patients - stats.doctors - stats.pharmacies, color: 'bg-accent' },
   ];
 
   const systemHealth = [
@@ -109,7 +123,7 @@ const AdminDashboard: React.FC = () => {
                 <span className="text-sm font-medium flex-1">{item.role}</span>
                 <span className="text-sm font-bold">{item.count}</span>
                 <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
-                  <div className={`h-full ${item.color} rounded-full`} style={{ width: `${(item.count / 650) * 100}%` }} />
+                  <div className={`h-full ${item.color} rounded-full`} style={{ width: `${stats.totalUsers > 0 ? (item.count / stats.totalUsers) * 100 : 0}%` }} />
                 </div>
               </div>
             ))}

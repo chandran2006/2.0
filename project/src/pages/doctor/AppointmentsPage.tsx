@@ -44,8 +44,9 @@ const DoctorAppointmentsPage: React.FC = () => {
   };
 
   const handleReject = async (id: number) => {
+    if (!confirm('Are you sure you want to reject this appointment?')) return;
     try {
-      await appointmentAPI.cancelAppointment(id);
+      await appointmentAPI.rejectAppointment(id);
       toast.success('Appointment rejected');
       loadAppointments();
     } catch (error) {

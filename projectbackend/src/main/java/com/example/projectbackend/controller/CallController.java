@@ -60,6 +60,12 @@ public class CallController {
         return ResponseEntity.ok(Map.of("call", call, "message", "Call ended"));
     }
     
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getCall(@PathVariable Long id) {
+        Call call = callService.getCall(id);
+        return ResponseEntity.ok(call);
+    }
+    
     @GetMapping("/incoming/{userId}")
     public ResponseEntity<?> getIncomingCalls(@PathVariable Long userId) {
         return ResponseEntity.ok(callService.getIncomingCalls(userId));

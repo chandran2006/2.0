@@ -45,6 +45,7 @@ const AppointmentsPage: React.FC = () => {
   };
 
   const cancelAppointment = async (id: number) => {
+    if (!confirm('Are you sure you want to cancel this appointment?')) return;
     try {
       await appointmentAPI.cancelAppointment(id);
       toast.success('Appointment cancelled');

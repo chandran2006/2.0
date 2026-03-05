@@ -39,8 +39,13 @@ public class UserService {
     
     public Optional<User> login(String email, String password) {
         Optional<User> user = userRepository.findByEmail(email);
-        if (user.isPresent() && passwordEncoder.matches(password, user.get().getPassword())) {
-            return user;
+        if (user.isPresent()) {
+            if (Boolean.TRUE.equals(user.get().getBlocked())) {
+                throw new RuntimeException("Your account has been blocked. Please contact the administrator.");
+            }
+            if (passwordEncoder.matches(password, user.get().getPassword())) {
+                return user;
+            }
         }
         return Optional.empty();
     }
@@ -91,5 +96,16 @@ public class UserService {
     
     public long getUserCount() {
         return userRepository.count();
+    }
+    
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+    
+    public User toggleBlockUser(Long userId) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+        user.setBlocked(!Boolean.TRUE.equals(user.getBlocked()));
+        return userRepository.save(user);
     }
 }

@@ -71,6 +71,12 @@ public class AuthController {
                         System.err.println("Login failed - Invalid credentials for: " + email);
                         return ResponseEntity.status(401).body(Map.of("message", "Invalid email or password"));
                     });
+        } catch (RuntimeException e) {
+            if (e.getMessage().contains("blocked")) {
+                return ResponseEntity.status(403).body(Map.of("message", e.getMessage()));
+            }
+            System.err.println("Login error: " + e.getMessage());
+            return ResponseEntity.status(500).body(Map.of("message", "Login failed: " + e.getMessage()));
         } catch (Exception e) {
             System.err.println("Login error: " + e.getMessage());
             e.printStackTrace();

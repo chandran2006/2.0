@@ -30,8 +30,10 @@ export const appointmentAPI = {
     api.get(`/appointments/doctor/${doctorId}`),
   approveAppointment: (id: number) =>
     api.put(`/appointments/${id}/approve`),
+  rejectAppointment: (id: number) =>
+    api.put(`/appointments/${id}/reject`),
   cancelAppointment: (id: number) =>
-    api.put(`/appointments/${id}/cancel`),
+    api.delete(`/appointments/${id}`),
 };
 
 // Prescription APIs
@@ -68,6 +70,7 @@ export const callAPI = {
   acceptCall: (callId: number) => api.put(`/calls/${callId}/accept`),
   rejectCall: (callId: number) => api.put(`/calls/${callId}/reject`),
   endCall: (callId: number) => api.put(`/calls/${callId}/end`),
+  getCallStatus: (callId: number) => api.get(`/calls/${callId}`),
   doctorOnline: (doctorId: number) =>
     api.post('/calls/doctor/online', { doctorId }),
   doctorOffline: (doctorId: number) =>
@@ -83,6 +86,15 @@ export const healthRecordAPI = {
   getPatientRecords: (patientId: number) =>
     api.get(`/health-records/patient/${patientId}`),
   create: (data: any) => api.post('/health-records', data),
+};
+
+// Admin APIs
+export const adminAPI = {
+  getAllUsers: () => api.get('/admin/users'),
+  toggleBlockUser: (userId: number) => api.put(`/admin/users/${userId}/toggle-block`),
+  getSettings: () => api.get('/admin/settings'),
+  updateSettings: (settings: any) => api.put('/admin/settings', settings),
+  resetSettings: () => api.post('/admin/settings/reset'),
 };
 
 export default api;

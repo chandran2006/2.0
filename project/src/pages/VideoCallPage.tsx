@@ -26,6 +26,7 @@ const VideoCallPage: React.FC = () => {
       channelName={channelName}
       userId={userId}
       userRole={userRole as 'doctor' | 'patient'}
+      userName={user.name}
       token={token || undefined}
       onLeave={() => navigate('/dashboard')}
     />
