@@ -4,6 +4,7 @@ import { Heart, LayoutDashboard, Calendar, FileText, Pill, Activity, MapPin, Log
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { useBlockListener } from '@/hooks/useBlockListener';
+import { useMaintenanceMode } from '@/hooks/useMaintenanceMode';
 
 const patientNav = [
   { label: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
@@ -49,6 +50,9 @@ const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ children }) 
   
   // Listen for block notifications
   useBlockListener();
+  
+  // Listen for maintenance mode
+  useMaintenanceMode();
 
   const navItems = user?.role === 'DOCTOR' ? doctorNav
     : user?.role === 'PHARMACY' ? pharmacyNav

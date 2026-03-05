@@ -74,6 +74,8 @@ public class AuthController {
         } catch (RuntimeException e) {
             if (e.getMessage().contains("blocked")) {
                 return ResponseEntity.status(403).body(Map.of("message", e.getMessage()));
+            } else if (e.getMessage().contains("maintenance")) {
+                return ResponseEntity.status(503).body(Map.of("message", e.getMessage()));
             }
             System.err.println("Login error: " + e.getMessage());
             return ResponseEntity.status(500).body(Map.of("message", "Login failed: " + e.getMessage()));

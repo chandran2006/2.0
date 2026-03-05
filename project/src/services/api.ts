@@ -95,6 +95,7 @@ export const adminAPI = {
   getSettings: () => api.get('/admin/settings'),
   updateSettings: (settings: any) => api.put('/admin/settings', settings),
   resetSettings: () => api.post('/admin/settings/reset'),
+  getMaintenanceStatus: () => api.get('/admin/settings/maintenance'),
 };
 
 export default api;

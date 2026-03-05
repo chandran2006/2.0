@@ -14,6 +14,7 @@ public class UserService {
     
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final SystemSettingsService settingsService;
     
     public User register(User user) {
         try {
@@ -40,9 +41,25 @@ public class UserService {
     public Optional<User> login(String email, String password) {
         Optional<User> user = userRepository.findByEmail(email);
         if (user.isPresent()) {
+            // Check if user is blocked
             if (Boolean.TRUE.equals(user.get().getBlocked())) {
                 throw new RuntimeException("Your account has been blocked. Please contact the administrator.");
             }
+            
+            // Check maintenance mode (allow only admins)
+            try {
+                var settings = settingsService.getSettings();
+                if (Boolean.TRUE.equals(settings.getMaintenanceMode()) && 
+                    user.get().getRole() != User.Role.ADMIN) {
+                    throw new RuntimeException("System is currently under maintenance. Please try again later.");
+                }
+            } catch (RuntimeException e) {
+                throw e;
+            } catch (Exception e) {
+                // If settings service fails, allow login
+                System.err.println("Failed to check maintenance mode: " + e.getMessage());
+            }
+            
             if (passwordEncoder.matches(password, user.get().getPassword())) {
                 return user;
             }
