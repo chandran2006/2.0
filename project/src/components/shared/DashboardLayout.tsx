@@ -79,7 +79,7 @@ const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ children }) 
           <div className="w-9 h-9 rounded-lg bg-gradient-primary flex items-center justify-center">
             <Heart className="w-5 h-5 text-primary-foreground" />
           </div>
-          <span className="font-display text-lg font-bold text-foreground">TeleAsha 2.0</span>
+          <span className="font-display text-lg font-bold text-foreground">MeDora</span>
         </Link>
 
         <nav className="flex-1 space-y-1 overflow-y-auto">
@@ -127,7 +127,7 @@ const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ children }) 
             <div className="w-8 h-8 rounded-lg bg-gradient-primary flex items-center justify-center">
               <Heart className="w-4 h-4 text-primary-foreground" />
             </div>
-            <span className="font-display text-lg font-bold">TeleAsha 2.0</span>
+            <span className="font-display text-lg font-bold">MeDora</span>
           </Link>
           <Button variant="ghost" size="sm" onClick={handleLogout}>
             <LogOut className="w-4 h-4" />

@@ -28,7 +28,7 @@ const ContactPage = () => {
             <div className="w-9 h-9 rounded-lg bg-gradient-primary flex items-center justify-center">
               <Heart className="w-5 h-5 text-primary-foreground" />
             </div>
-            <span className="font-display text-xl font-bold text-foreground">TeleAsha 2.0</span>
+            <span className="font-display text-xl font-bold text-foreground">MeDora</span>
           </Link>
           <Link to="/">
             <Button variant="ghost" size="sm">
@@ -102,7 +102,7 @@ const ContactPage = () => {
                     <div>
                       <h3 className="font-semibold text-foreground mb-1">Address</h3>
                       <p className="text-muted-foreground">
-                        TeleAsha 2.0<br />
+                        MeDora<br />
                         Healthcare Services<br />
                         India
                       </p>
@@ -260,7 +260,7 @@ const ContactPage = () => {
       {/* Footer */}
       <footer className="py-8 px-6 border-t border-border">
         <div className="container mx-auto text-center">
-          <p className="text-sm text-muted-foreground">© 2026 TeleAsha 2.0. All rights reserved.</p>
+          <p className="text-sm text-muted-foreground">© 2026 MeDora. All rights reserved.</p>
         </div>
       </footer>
     </div>

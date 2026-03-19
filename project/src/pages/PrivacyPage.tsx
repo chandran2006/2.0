@@ -12,7 +12,7 @@ const PrivacyPage = () => {
             <div className="w-9 h-9 rounded-lg bg-gradient-primary flex items-center justify-center">
               <Heart className="w-5 h-5 text-primary-foreground" />
             </div>
-            <span className="font-display text-xl font-bold text-foreground">TeleAsha 2.0</span>
+            <span className="font-display text-xl font-bold text-foreground">MeDora</span>
           </Link>
           <Link to="/">
             <Button variant="ghost" size="sm">
@@ -41,7 +41,7 @@ const PrivacyPage = () => {
                 Your Privacy Matters
               </h2>
               <p className="text-muted-foreground leading-relaxed">
-                At TeleAsha 2.0, we are committed to protecting your privacy and ensuring the security of your personal health information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our telemedicine platform.
+                At MeDora, we are committed to protecting your privacy and ensuring the security of your personal health information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our telemedicine platform.
               </p>
             </div>
 
@@ -179,7 +179,7 @@ const PrivacyPage = () => {
                 <div className="space-y-2">
                   <p><strong>Email:</strong> bhemachandran2006@gmail.com</p>
                   <p><strong>Phone:</strong> +91 9042339824</p>
-                  <p><strong>Address:</strong> TeleAsha 2.0, Healthcare Services, India</p>
+                  <p><strong>Address:</strong> MeDora, Healthcare Services, India</p>
                 </div>
               </section>
             </div>
@@ -190,7 +190,7 @@ const PrivacyPage = () => {
       {/* Footer */}
       <footer className="py-8 px-6 border-t border-border">
         <div className="container mx-auto text-center">
-          <p className="text-sm text-muted-foreground">© 2026 TeleAsha 2.0. All rights reserved.</p>
+          <p className="text-sm text-muted-foreground">© 2026 MeDora. All rights reserved.</p>
         </div>
       </footer>
     </div>

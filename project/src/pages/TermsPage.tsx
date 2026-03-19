@@ -12,7 +12,7 @@ const TermsPage = () => {
             <div className="w-9 h-9 rounded-lg bg-gradient-primary flex items-center justify-center">
               <Heart className="w-5 h-5 text-primary-foreground" />
             </div>
-            <span className="font-display text-xl font-bold text-foreground">TeleAsha 2.0</span>
+            <span className="font-display text-xl font-bold text-foreground">MeDora</span>
           </Link>
           <Link to="/">
             <Button variant="ghost" size="sm">
@@ -41,7 +41,7 @@ const TermsPage = () => {
                 Agreement to Terms
               </h2>
               <p className="text-muted-foreground leading-relaxed">
-                Welcome to TeleAsha 2.0. By accessing or using our telemedicine platform, you agree to be bound by these Terms of Service. Please read them carefully. If you do not agree to these terms, you may not use our services.
+                Welcome to MeDora. By accessing or using our telemedicine platform, you agree to be bound by these Terms of Service. Please read them carefully. If you do not agree to these terms, you may not use our services.
               </p>
             </div>
 
@@ -49,7 +49,7 @@ const TermsPage = () => {
               <section className="bg-card rounded-2xl p-8 shadow-card">
                 <h3 className="font-display text-xl font-bold mb-4">1. Service Description</h3>
                 <p className="text-muted-foreground mb-4">
-                  TeleAsha 2.0 is a telemedicine platform that connects patients with licensed healthcare providers through:
+                  MeDora is a telemedicine platform that connects patients with licensed healthcare providers through:
                 </p>
                 <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
                   <li>Video and audio consultations with doctors</li>
@@ -83,7 +83,7 @@ const TermsPage = () => {
                 <div className="space-y-4 text-muted-foreground">
                   <p className="font-semibold text-foreground">IMPORTANT: Please read carefully</p>
                   <ul className="list-disc list-inside space-y-2 ml-4">
-                    <li>TeleAsha 2.0 is a platform connecting patients with healthcare providers; we do not provide medical advice directly</li>
+                    <li>MeDora is a platform connecting patients with healthcare providers; we do not provide medical advice directly</li>
                     <li>Our services are not for medical emergencies. Call emergency services (108/112) for urgent medical situations</li>
                     <li>Telemedicine has limitations and may not be suitable for all conditions</li>
                     <li>Healthcare providers on our platform are independent professionals responsible for their own medical advice</li>
@@ -157,7 +157,7 @@ const TermsPage = () => {
               <section className="bg-card rounded-2xl p-8 shadow-card">
                 <h3 className="font-display text-xl font-bold mb-4">7. Privacy and Data Protection</h3>
                 <p className="text-muted-foreground mb-4">
-                  Your privacy is important to us. Our collection and use of personal information is governed by our Privacy Policy. By using TeleAsha 2.0, you consent to:
+                  Your privacy is important to us. Our collection and use of personal information is governed by our Privacy Policy. By using MeDora, you consent to:
                 </p>
                 <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
                   <li>Collection and processing of your health information</li>
@@ -170,7 +170,7 @@ const TermsPage = () => {
               <section className="bg-card rounded-2xl p-8 shadow-card">
                 <h3 className="font-display text-xl font-bold mb-4">8. Intellectual Property</h3>
                 <p className="text-muted-foreground mb-4">
-                  All content on TeleAsha 2.0, including text, graphics, logos, software, and design, is owned by us or our licensors and protected by intellectual property laws. You may not:
+                  All content on MeDora, including text, graphics, logos, software, and design, is owned by us or our licensors and protected by intellectual property laws. You may not:
                 </p>
                 <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
                   <li>Copy, modify, or distribute our content without permission</li>
@@ -228,7 +228,7 @@ const TermsPage = () => {
               <section className="bg-card rounded-2xl p-8 shadow-card">
                 <h3 className="font-display text-xl font-bold mb-4">12. Dispute Resolution</h3>
                 <p className="text-muted-foreground mb-4">
-                  Any disputes arising from these terms or your use of TeleAsha 2.0 will be resolved through:
+                  Any disputes arising from these terms or your use of MeDora will be resolved through:
                 </p>
                 <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
                   <li>Good faith negotiation between parties</li>
@@ -241,7 +241,7 @@ const TermsPage = () => {
               <section className="bg-card rounded-2xl p-8 shadow-card">
                 <h3 className="font-display text-xl font-bold mb-4">13. Changes to Terms</h3>
                 <p className="text-muted-foreground">
-                  We may modify these Terms of Service at any time. We will notify you of significant changes via email or platform notification. Continued use of TeleAsha 2.0 after changes constitutes acceptance of the new terms.
+                  We may modify these Terms of Service at any time. We will notify you of significant changes via email or platform notification. Continued use of MeDora after changes constitutes acceptance of the new terms.
                 </p>
               </section>
 
@@ -260,13 +260,13 @@ const TermsPage = () => {
                 <div className="space-y-2">
                   <p><strong>Email:</strong> bhemachandran2006@gmail.com</p>
                   <p><strong>Phone:</strong> +91 9042339824</p>
-                  <p><strong>Address:</strong> TeleAsha 2.0, Healthcare Services, India</p>
+                  <p><strong>Address:</strong> MeDora, Healthcare Services, India</p>
                 </div>
               </section>
 
               <div className="bg-secondary/50 rounded-2xl p-6 text-center">
                 <p className="text-sm text-muted-foreground">
-                  By using TeleAsha 2.0, you acknowledge that you have read, understood, and agree to be bound by these Terms of Service.
+                  By using MeDora, you acknowledge that you have read, understood, and agree to be bound by these Terms of Service.
                 </p>
               </div>
             </div>
@@ -277,7 +277,7 @@ const TermsPage = () => {
       {/* Footer */}
       <footer className="py-8 px-6 border-t border-border">
         <div className="container mx-auto text-center">
-          <p className="text-sm text-muted-foreground">© 2026 TeleAsha 2.0. All rights reserved.</p>
+          <p className="text-sm text-muted-foreground">© 2026 MeDora. All rights reserved.</p>
         </div>
       </footer>
     </div>

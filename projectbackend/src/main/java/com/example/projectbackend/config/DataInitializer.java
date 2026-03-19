@@ -21,16 +21,24 @@ public class DataInitializer implements CommandLineRunner {
     public void run(String... args) {
         System.out.println("=== Starting Data Initialization ===");
         
-        // Check if data already exists
-        if (userRepository.count() > 0) {
-            System.out.println("Data already exists. Skipping initialization.");
+        // Check if demo accounts exist with correct domain
+        boolean needsInit = userRepository.findByEmail("patient1@medora.com").isEmpty();
+        
+        if (!needsInit) {
+            System.out.println("Demo accounts already exist.");
             System.out.println("Total users in database: " + userRepository.count());
             return;
         }
         
+        // Clean up old accounts if they exist
+        userRepository.findByEmail("patient1@teleasha.com").ifPresent(userRepository::delete);
+        userRepository.findByEmail("dr.sharma@teleasha.com").ifPresent(userRepository::delete);
+        userRepository.findByEmail("pharmacy@teleasha.com").ifPresent(userRepository::delete);
+        userRepository.findByEmail("admin@teleasha.com").ifPresent(userRepository::delete);
+        
         // Create sample users
         User patient = User.builder()
-                .email("patient1@teleasha.com")
+                .email("patient1@medora.com")
                 .password(passwordEncoder.encode("password123"))
                 .name("Ramesh Kumar")
                 .role(User.Role.PATIENT)
@@ -41,7 +49,7 @@ public class DataInitializer implements CommandLineRunner {
         System.out.println("Created patient: " + patient.getEmail());
         
         User doctor = User.builder()
-                .email("dr.sharma@teleasha.com")
+                .email("dr.sharma@medora.com")
                 .password(passwordEncoder.encode("password123"))
                 .name("Dr. Sharma")
                 .role(User.Role.DOCTOR)
@@ -54,7 +62,7 @@ public class DataInitializer implements CommandLineRunner {
         System.out.println("Created doctor: " + doctor.getEmail());
         
         User pharmacyUser = User.builder()
-                .email("pharmacy@teleasha.com")
+                .email("pharmacy@medora.com")
                 .password(passwordEncoder.encode("pharmacy123"))
                 .name("MedPlus Pharmacy")
                 .role(User.Role.PHARMACY)
@@ -67,7 +75,7 @@ public class DataInitializer implements CommandLineRunner {
         System.out.println("Created pharmacy: " + pharmacyUser.getEmail());
         
         User admin = User.builder()
-                .email("admin@teleasha.com")
+                .email("admin@medora.com")
                 .password(passwordEncoder.encode("admin123"))
                 .name("Admin User")
                 .role(User.Role.ADMIN)

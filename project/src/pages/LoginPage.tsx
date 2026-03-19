@@ -63,7 +63,7 @@ const LoginPage: React.FC = () => {
             <div className="w-12 h-12 rounded-xl bg-primary-foreground/20 flex items-center justify-center">
               <Heart className="w-7 h-7" />
             </div>
-            <span className="font-display text-3xl font-bold">TeleAsha 2.0</span>
+            <span className="font-display text-3xl font-bold">MeDora</span>
           </div>
           <h2 className="font-display text-4xl font-bold mb-4 leading-tight">
             Your Health, Our Priority
@@ -86,7 +86,7 @@ const LoginPage: React.FC = () => {
             <div className="w-9 h-9 rounded-lg bg-gradient-primary flex items-center justify-center">
               <Heart className="w-5 h-5 text-primary-foreground" />
             </div>
-            <span className="font-display text-xl font-bold">TeleAsha 2.0</span>
+            <span className="font-display text-xl font-bold">MeDora</span>
           </div>
 
           <h1 className="font-display text-3xl font-bold mb-2">Welcome back</h1>
@@ -147,10 +147,10 @@ const LoginPage: React.FC = () => {
             <p className="text-sm text-muted-foreground mb-3">Quick login as:</p>
             <div className="grid grid-cols-2 gap-2">
               {[
-                { label: 'Patient', email: 'patient1@teleasha.com', pass: 'password123' },
-                { label: 'Doctor', email: 'dr.sharma@teleasha.com', pass: 'password123' },
-                { label: 'Pharmacy', email: 'pharmacy@teleasha.com', pass: 'pharmacy123' },
-                { label: 'Admin', email: 'admin@teleasha.com', pass: 'admin123' },
+                { label: 'Patient', email: 'patient1@medora.com', pass: 'password123' },
+                { label: 'Doctor', email: 'dr.sharma@medora.com', pass: 'password123' },
+                { label: 'Pharmacy', email: 'pharmacy@medora.com', pass: 'pharmacy123' },
+                { label: 'Admin', email: 'admin@medora.com', pass: 'admin123' },
               ].map((cred) => (
                 <button
                   key={cred.label}

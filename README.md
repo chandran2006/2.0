@@ -72,10 +72,10 @@ Call server runs on: http://localhost:5002
 
 ## Demo Accounts
 
-- **Patient**: patient1@teleasha.com / password123
-- **Doctor**: dr.sharma@teleasha.com / password123
-- **Pharmacy**: pharmacy@teleasha.com / pharmacy123
-- **Admin**: admin@teleasha.com / admin123
+- **Patient**: patient1@medora.com / password123
+- **Doctor**: dr.sharma@medora.com / password123
+- **Pharmacy**: pharmacy@medora.com / pharmacy123
+- **Admin**: admin@medora.com / admin123
 
 ## Project Structure
 

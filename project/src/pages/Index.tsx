@@ -37,7 +37,7 @@ const Index = () => {
             <div className="w-9 h-9 rounded-lg bg-gradient-primary flex items-center justify-center">
               <Heart className="w-5 h-5 text-primary-foreground" />
             </div>
-            <span className="font-display text-xl font-bold text-foreground">TeleAsha 2.0</span>
+            <span className="font-display text-xl font-bold text-foreground">MeDora</span>
           </Link>
           <div className="hidden md:flex items-center gap-8">
             <a href="#features" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Features</a>
@@ -193,7 +193,7 @@ const Index = () => {
                 Ready to Take Control of Your Health?
               </h2>
               <p className="text-primary-foreground/80 text-lg mb-8">
-                Join thousands who trust TeleAsha 2.0 for accessible, affordable healthcare.
+                Join thousands who trust MeDora for accessible, affordable healthcare.
               </p>
               <Link to="/signup">
                 <Button size="lg" className="bg-card text-foreground hover:bg-card/90 px-8 h-12 text-base font-semibold">
@@ -213,9 +213,9 @@ const Index = () => {
             <div className="w-8 h-8 rounded-lg bg-gradient-primary flex items-center justify-center">
               <Heart className="w-4 h-4 text-primary-foreground" />
             </div>
-            <span className="font-display font-bold text-foreground">TeleAsha 2.0</span>
+            <span className="font-display font-bold text-foreground">MeDora</span>
           </div>
-          <p className="text-sm text-muted-foreground">© 2026 TeleAsha 2.0. All rights reserved.</p>
+          <p className="text-sm text-muted-foreground">© 2026 MeDora. All rights reserved.</p>
           <div className="flex items-center gap-6">
             <Link to="/privacy" className="text-sm text-muted-foreground hover:text-foreground">Privacy</Link>
             <Link to="/terms" className="text-sm text-muted-foreground hover:text-foreground">Terms</Link>
