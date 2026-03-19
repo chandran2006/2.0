@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { useAuth } from '@/contexts/AuthContext';
-import { appointmentAPI, prescriptionAPI, callAPI } from '@/services/api';
+import { appointmentAPI, prescriptionAPI, callAPI, authAPI } from '@/services/api';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -31,11 +31,8 @@ const DoctorDashboard: React.FC = () => {
   const loadOnlineStatus = async () => {
     if (!user?.id) return;
     try {
-      const response = await fetch(`http://localhost:8080/api/auth/current-user/${user.id}`);
-      const data = await response.json();
-      const isOnline = data.isAvailable === true;
-      setIsOnline(isOnline);
-      console.log('Dashboard loaded doctor status:', isOnline);
+      const res = await authAPI.getCurrentUser(parseInt(user.id));
+      setIsOnline(res.data.isAvailable === true);
     } catch (error) {
       console.error('Failed to load online status:', error);
     }
@@ -91,25 +88,10 @@ const DoctorDashboard: React.FC = () => {
   
   const acceptCall = async () => {
     if (!incomingCall) return;
-    
     try {
-      // Update call status in backend
       await callAPI.acceptCall(incomingCall.callId);
-      
-      // Notify patient via socket
-      socketService.emit('consultation_accepted', {
-        callId: incomingCall.callId,
-        patientId: incomingCall.patientId,
-        doctorId: user?.id,
-        doctorName: user?.name,
-        roomId: incomingCall.roomId
-      });
-      
       toast.success('Call accepted! Joining video call...');
-      
-      // Navigate to video call
       navigate(`/video-call?room=${incomingCall.roomId}`);
-      
       setIncomingCall(null);
     } catch (error) {
       console.error('Failed to accept call:', error);
@@ -119,18 +101,8 @@ const DoctorDashboard: React.FC = () => {
   
   const rejectCall = async () => {
     if (!incomingCall) return;
-    
     try {
-      // Update call status in backend
       await callAPI.rejectCall(incomingCall.callId);
-      
-      // Notify patient via socket
-      socketService.emit('consultation_rejected', {
-        callId: incomingCall.callId,
-        patientId: incomingCall.patientId,
-        reason: 'Doctor is busy'
-      });
-      
       toast.info('Call declined');
       setIncomingCall(null);
     } catch (error) {
@@ -145,8 +117,8 @@ const DoctorDashboard: React.FC = () => {
         await appointmentAPI.approveAppointment(id);
         toast.success('Appointment approved');
       } else {
-        await appointmentAPI.cancelAppointment(id);
-        toast.success('Appointment cancelled');
+        await appointmentAPI.rejectAppointment(id);
+        toast.success('Appointment rejected');
       }
       loadData();
     } catch (error) {

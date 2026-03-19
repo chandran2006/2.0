@@ -16,6 +16,10 @@ public class HealthRecord {
     private Long id;
     
     private Long patientId;
+    private String type;
+    private String doctor;
+    private String result;
+    private String date;
     private String recordType;
     
     @Column(length = 2000)

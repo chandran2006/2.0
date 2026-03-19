@@ -15,6 +15,7 @@ const DoctorsPage: React.FC = () => {
   const [filteredDoctors, setFilteredDoctors] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [bookingOpen, setBookingOpen] = useState(false);
+  const [selectedDoctorId, setSelectedDoctorId] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
   const [waitingForDoctor, setWaitingForDoctor] = useState(false);
   const [currentCallId, setCurrentCallId] = useState<number | null>(null);
@@ -195,7 +196,7 @@ const DoctorsPage: React.FC = () => {
                 )}
                 <Button 
                   size="sm" 
-                  onClick={() => setBookingOpen(true)} 
+                  onClick={() => { setSelectedDoctorId(doc.id.toString()); setBookingOpen(true); }} 
                   className="bg-gradient-primary text-primary-foreground h-8 text-xs w-full"
                 >
                   <Calendar className="w-3 h-3 mr-1" /> Book
@@ -209,7 +210,7 @@ const DoctorsPage: React.FC = () => {
         )}
       </div>
 
-      <BookAppointmentDialog open={bookingOpen} onOpenChange={setBookingOpen} onSuccess={loadDoctors} />
+      <BookAppointmentDialog open={bookingOpen} onOpenChange={setBookingOpen} onSuccess={loadDoctors} preselectedDoctorId={selectedDoctorId} />
     </div>
     </DashboardLayout>
   );

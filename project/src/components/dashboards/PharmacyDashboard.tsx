@@ -25,7 +25,7 @@ const PharmacyDashboard: React.FC = () => {
     try {
       const [medRes, rxRes] = await Promise.all([
         medicineAPI.getAll(),
-        prescriptionAPI.getPatientPrescriptions(1) // Get all prescriptions
+        prescriptionAPI.getAll()
       ]);
       setMedicines(medRes.data || []);
       setPrescriptions(rxRes.data || []);
@@ -34,8 +34,8 @@ const PharmacyDashboard: React.FC = () => {
       setStats({
         total: medRes.data?.length || 0,
         lowStock,
-        orders: rxRes.data?.length || 0,
-        revenue: rxRes.data?.length * 150 || 0
+        orders: rxRes.data?.filter((r: any) => r.status === 'ACTIVE').length || 0,
+        revenue: (rxRes.data?.filter((r: any) => r.status === 'COMPLETED').length || 0) * 150
       });
     } catch (error) {
       console.error('Error loading data:', error);

@@ -1,6 +1,7 @@
 package com.example.projectbackend.controller;
 
 import com.example.projectbackend.model.Appointment;
+import com.example.projectbackend.model.AppointmentDTO;
 import com.example.projectbackend.service.AppointmentService;
 import com.example.projectbackend.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,11 @@ public class AppointmentController {
     public ResponseEntity<?> getDoctors() {
         return ResponseEntity.ok(userService.getDoctors());
     }
+
+    @GetMapping("/all")
+    public ResponseEntity<?> getAllAppointments() {
+        return ResponseEntity.ok(appointmentService.getAllAppointments());
+    }
     
     @PostMapping("/book")
     public ResponseEntity<?> bookAppointment(@RequestBody Appointment appointment) {
@@ -29,12 +35,12 @@ public class AppointmentController {
     }
     
     @GetMapping("/patient/{patientId}")
-    public ResponseEntity<List<Appointment>> getPatientAppointments(@PathVariable Long patientId) {
+    public ResponseEntity<List<AppointmentDTO>> getPatientAppointments(@PathVariable Long patientId) {
         return ResponseEntity.ok(appointmentService.getPatientAppointments(patientId));
     }
     
     @GetMapping("/doctor/{doctorId}")
-    public ResponseEntity<List<Appointment>> getDoctorAppointments(@PathVariable Long doctorId) {
+    public ResponseEntity<List<AppointmentDTO>> getDoctorAppointments(@PathVariable Long doctorId) {
         return ResponseEntity.ok(appointmentService.getDoctorAppointments(doctorId));
     }
     

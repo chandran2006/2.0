@@ -14,6 +14,17 @@ public class PrescriptionController {
     
     private final PrescriptionService prescriptionService;
     
+    @GetMapping("/all")
+    public ResponseEntity<?> getAllPrescriptions() {
+        return ResponseEntity.ok(prescriptionService.getAllPrescriptions());
+    }
+
+    @PutMapping("/{id}/status")
+    public ResponseEntity<?> updateStatus(@PathVariable Long id, @RequestBody Map<String, String> body) {
+        Prescription updated = prescriptionService.updateStatus(id, body.get("status"));
+        return ResponseEntity.ok(Map.of("prescription", updated, "message", "Status updated"));
+    }
+
     @PostMapping("/create")
     public ResponseEntity<?> createPrescription(@RequestBody Prescription prescription) {
         Prescription created = prescriptionService.createPrescription(prescription);

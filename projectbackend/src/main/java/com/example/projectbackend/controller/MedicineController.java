@@ -30,6 +30,12 @@ public class MedicineController {
         return ResponseEntity.ok(Map.of("medicine", created, "message", "Medicine added"));
     }
     
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateMedicine(@PathVariable Long id, @RequestBody Medicine medicine) {
+        Medicine updated = medicineService.updateMedicine(id, medicine);
+        return ResponseEntity.ok(Map.of("medicine", updated, "message", "Medicine updated"));
+    }
+
     @PutMapping("/{id}/update-stock")
     public ResponseEntity<?> updateStock(@PathVariable Long id, @RequestBody Map<String, Integer> request) {
         Medicine updated = medicineService.updateStock(id, request.get("stockLevel"));
@@ -39,5 +45,11 @@ public class MedicineController {
     @GetMapping("/pharmacy/{pharmacyId}")
     public ResponseEntity<?> getPharmacyMedicines(@PathVariable Long pharmacyId) {
         return ResponseEntity.ok(medicineService.getPharmacyMedicines(pharmacyId));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteMedicine(@PathVariable Long id) {
+        medicineService.deleteMedicine(id);
+        return ResponseEntity.ok(Map.of("message", "Medicine deleted"));
     }
 }

@@ -9,5 +9,5 @@ import java.util.List;
 public interface MedicineRepository extends JpaRepository<Medicine, Long> {
     List<Medicine> findByNameContainingIgnoreCase(String name);
     List<Medicine> findByPharmacyId(Long pharmacyId);
-    List<Medicine> findByAvailability(Boolean availability);
+    List<Medicine> findByAvailable(Boolean available);
 }

@@ -68,7 +68,24 @@ public class CallController {
     
     @GetMapping("/incoming/{userId}")
     public ResponseEntity<?> getIncomingCalls(@PathVariable Long userId) {
-        return ResponseEntity.ok(callService.getIncomingCalls(userId));
+        var calls = callService.getIncomingCalls(userId);
+        // Enrich with initiator (patient) name
+        var enriched = calls.stream().map(call -> {
+            java.util.Map<String, Object> map = new java.util.HashMap<>();
+            map.put("id", call.getId());
+            map.put("initiatorId", call.getInitiatorId());
+            map.put("receiverId", call.getReceiverId());
+            map.put("callType", call.getCallType());
+            map.put("status", call.getStatus());
+            map.put("roomId", call.getRoomId());
+            map.put("createdAt", call.getStartedAt());
+            userService.findById(call.getInitiatorId()).ifPresent(u -> {
+                map.put("patientName", u.getName());
+                map.put("patientEmail", u.getEmail());
+            });
+            return map;
+        }).collect(java.util.stream.Collectors.toList());
+        return ResponseEntity.ok(enriched);
     }
     
     @GetMapping("/history/{userId}")

@@ -1,25 +1,35 @@
 import React, { useState, useEffect } from 'react';
-import { Pill, Search, ShoppingCart } from 'lucide-react';
+import { Pill, Search, ShoppingCart, MapPin } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { medicineAPI } from '@/services/api';
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/shared/DashboardLayout';
 
 const MedicinesPage: React.FC = () => {
   const [medicines, setMedicines] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const handleOrder = (med: any) => {
+    toast.success(`${med.name} added! Visit a pharmacy to collect.`, {
+      action: { label: 'Find Pharmacy', onClick: () => navigate('/patient/pharmacy') }
+    });
+  };
 
   useEffect(() => {
     if (searchQuery.length > 2) {
       searchMedicines();
-    } else {
+    } else if (searchQuery.length === 0) {
       loadAllMedicines();
     }
   }, [searchQuery]);
+
+  useEffect(() => { loadAllMedicines(); }, []);
 
   const loadAllMedicines = async () => {
     setLoading(true);
@@ -86,16 +96,14 @@ const MedicinesPage: React.FC = () => {
                     </div>
                   </div>
                 </div>
-                <Button size="sm" className="w-full mt-3 bg-gradient-primary" disabled={!med.available}>
+                <Button size="sm" className="w-full mt-3 bg-gradient-primary" disabled={!med.available} onClick={() => handleOrder(med)}>
                   <ShoppingCart className="w-3 h-3 mr-1" /> Order Now
                 </Button>
               </CardContent>
             </Card>
           ))
         ) : (
-          <p className="col-span-full text-center text-muted-foreground py-8">
-            {searchQuery ? 'No medicines found' : 'Start typing to search medicines'}
-          </p>
+          <p className="col-span-full text-center text-muted-foreground py-8">No medicines found</p>
         )}
       </div>
       </div>

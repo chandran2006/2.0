@@ -20,7 +20,7 @@ public class Medicine {
     private String dosageForm;
     private String dosageStrength;
     private Double price;
-    private Boolean availability = true;
+    private Boolean available = true;
     private Long pharmacyId;
     
     @Column(length = 1000)

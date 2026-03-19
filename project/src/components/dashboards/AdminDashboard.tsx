@@ -30,17 +30,17 @@ const AdminDashboard: React.FC = () => {
     try {
       const [usersRes, aptsRes, rxRes] = await Promise.all([
         adminAPI.getAllUsers(),
-        appointmentAPI.getDoctors(),
-        prescriptionAPI.getPatientPrescriptions(1)
+        appointmentAPI.getAll(),
+        prescriptionAPI.getAll(),
       ]);
-      
       const users = usersRes.data || [];
+      const apts = aptsRes.data || [];
       setStats({
         totalUsers: users.length,
         patients: users.filter((u: any) => u.role === 'PATIENT').length,
         doctors: users.filter((u: any) => u.role === 'DOCTOR').length,
         pharmacies: users.filter((u: any) => u.role === 'PHARMACY').length,
-        consultations: 0,
+        consultations: apts.filter((a: any) => a.status === 'APPROVED' || a.status === 'COMPLETED').length,
         prescriptions: rxRes.data?.length || 0,
         uptime: '99.9%'
       });
@@ -164,13 +164,13 @@ const AdminDashboard: React.FC = () => {
             <TrendingUp className="w-6 h-6" />
             <span className="text-sm">View Analytics</span>
           </Button>
-          <Button variant="outline" className="h-20 flex-col gap-2">
+          <Button variant="outline" onClick={() => navigate('/admin/settings')} className="h-20 flex-col gap-2">
             <Server className="w-6 h-6" />
-            <span className="text-sm">System Logs</span>
+            <span className="text-sm">System Settings</span>
           </Button>
-          <Button variant="outline" className="h-20 flex-col gap-2">
+          <Button variant="outline" onClick={() => navigate('/admin/reports')} className="h-20 flex-col gap-2">
             <Activity className="w-6 h-6" />
-            <span className="text-sm">Monitor</span>
+            <span className="text-sm">View Reports</span>
           </Button>
         </CardContent>
       </Card>

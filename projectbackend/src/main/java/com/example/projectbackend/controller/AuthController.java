@@ -86,6 +86,17 @@ public class AuthController {
         }
     }
     
+    @PutMapping("/current-user/{id}")
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody Map<String, String> updates) {
+        return userService.findById(id).map(user -> {
+            if (updates.containsKey("pharmacyName")) user.setPharmacyName(updates.get("pharmacyName"));
+            if (updates.containsKey("phone")) user.setPhone(updates.get("phone"));
+            if (updates.containsKey("address")) user.setAddress(updates.get("address"));
+            if (updates.containsKey("name")) user.setName(updates.get("name"));
+            return ResponseEntity.ok(userService.saveUser(user));
+        }).orElse(ResponseEntity.notFound().build());
+    }
+
     @GetMapping("/current-user/{id}")
     public ResponseEntity<?> getCurrentUser(@PathVariable Long id) {
         return userService.findById(id)

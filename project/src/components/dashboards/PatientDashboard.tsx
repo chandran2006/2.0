@@ -77,20 +77,16 @@ const PatientDashboard: React.FC = () => {
 
   const startConsultation = async (doctorId: string) => {
     try {
-      // Create call invitation in backend
       const response = await callAPI.initiate({
         initiatorId: user?.id,
         receiverId: doctorId,
         callType: 'VIDEO'
       });
-      
       const callData = response.data;
       const channelName = callData.channelName || `call-${callData.call.id}`;
-      
+      const token = callData.initiatorToken || '';
       toast.success('Call invitation sent to doctor');
-      
-      // Navigate to video call
-      navigate(`/video-call?room=${channelName}&appointmentId=${callData.call.id}`);
+      navigate(`/video-call?room=${channelName}&appointmentId=${callData.call.id}&token=${token}`);
     } catch (error) {
       console.error('Failed to start consultation:', error);
       toast.error('Failed to start consultation');

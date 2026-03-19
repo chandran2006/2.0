@@ -108,7 +108,7 @@ public class DataInitializer implements CommandLineRunner {
                     .dosageForm("Tablet")
                     .dosageStrength("500mg")
                     .price(50.0)
-                    .availability(true)
+                    .available(true)
                     .pharmacyId(pharmacy.getId())
                     .stockLevel(100)
                     .sideEffects("Mild nausea, headache")

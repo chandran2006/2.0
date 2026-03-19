@@ -14,6 +14,12 @@ public class HealthRecordController {
     
     private final HealthRecordRepository healthRecordRepository;
     
+    @PostMapping
+    public ResponseEntity<?> createRecord(@RequestBody HealthRecord record) {
+        HealthRecord saved = healthRecordRepository.save(record);
+        return ResponseEntity.ok(Map.of("record", saved, "message", "Record saved"));
+    }
+
     @PostMapping("/upload")
     public ResponseEntity<?> uploadRecord(@RequestBody HealthRecord record) {
         HealthRecord saved = healthRecordRepository.save(record);

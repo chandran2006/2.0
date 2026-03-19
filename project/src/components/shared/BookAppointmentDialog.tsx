@@ -12,9 +12,10 @@ interface BookAppointmentDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess?: () => void;
+  preselectedDoctorId?: string;
 }
 
-export const BookAppointmentDialog: React.FC<BookAppointmentDialogProps> = ({ open, onOpenChange, onSuccess }) => {
+export const BookAppointmentDialog: React.FC<BookAppointmentDialogProps> = ({ open, onOpenChange, onSuccess, preselectedDoctorId }) => {
   const { user } = useAuth();
   const [doctors, setDoctors] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -28,11 +29,24 @@ export const BookAppointmentDialog: React.FC<BookAppointmentDialogProps> = ({ op
   useEffect(() => {
     if (open) {
       appointmentAPI.getDoctors().then(res => setDoctors(res.data)).catch(console.error);
+      setFormData(f => ({ ...f, doctorId: preselectedDoctorId || '' }));
     }
-  }, [open]);
+  }, [open, preselectedDoctorId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.doctorId) {
+      toast.error('Please select a doctor');
+      return;
+    }
+    if (!formData.appointmentDate) {
+      toast.error('Please select a date and time');
+      return;
+    }
+    if (!formData.symptoms.trim()) {
+      toast.error('Please describe your symptoms');
+      return;
+    }
     setLoading(true);
     try {
       await appointmentAPI.bookAppointment({
