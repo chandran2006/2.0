@@ -26,7 +26,7 @@ export const authAPI = {
 export const appointmentAPI = {
   getDoctors: () => api.get('/appointments/doctors'),
   getAll: () => api.get('/appointments/all'),
-  bookAppointment: (data: any) => api.post('/appointments/book', data),
+  bookAppointment: (data: any) => api.post('/appointments/book', { ...data, patientId: Number(data.patientId) }),
   getPatientAppointments: (patientId: number) =>
     api.get(`/appointments/patient/${patientId}`),
   getDoctorAppointments: (doctorId: number) =>
@@ -68,7 +68,7 @@ export const medicineAPI = {
 
 // Pharmacy APIs
 export const pharmacyAPI = {
-  getAll: () => api.get('/pharmacies'),
+  getAll: () => api.get('/pharmacies/all'),
   getNearby: (lat: number, lng: number) =>
     api.get(`/pharmacies/nearby?lat=${lat}&lng=${lng}`),
 };

@@ -14,6 +14,11 @@ public class PharmacyController {
     
     private final PharmacyService pharmacyService;
     
+    @GetMapping
+    public ResponseEntity<?> getAllPharmaciesRoot() {
+        return ResponseEntity.ok(pharmacyService.getAllPharmacies());
+    }
+
     @GetMapping("/all")
     public ResponseEntity<?> getAllPharmacies() {
         return ResponseEntity.ok(pharmacyService.getAllPharmacies());

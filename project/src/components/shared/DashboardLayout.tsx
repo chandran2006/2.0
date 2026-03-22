@@ -15,6 +15,7 @@ const patientNav = [
   { label: 'Health Records', icon: Activity, path: '/patient/health-records' },
   { label: 'Pharmacy Finder', icon: MapPin, path: '/patient/pharmacy' },
   { label: 'Symptom Checker', icon: Stethoscope, path: '/patient/symptom-checker' },
+  { label: 'My Profile', icon: User, path: '/patient/profile' },
 ];
 
 const doctorNav = [
@@ -23,7 +24,9 @@ const doctorNav = [
   { label: 'Patients', icon: User, path: '/doctor/patients' },
   { label: 'Prescriptions', icon: FileText, path: '/doctor/prescriptions' },
   { label: 'Consultations', icon: Video, path: '/doctor/consultations' },
+  { label: 'Call Requests', icon: Video, path: '/doctor/consultation-requests' },
   { label: 'Schedule', icon: Clock, path: '/doctor/schedule' },
+  { label: 'My Profile', icon: User, path: '/doctor/profile' },
 ];
 
 const pharmacyNav = [

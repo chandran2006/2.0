@@ -27,10 +27,13 @@ public class CallController {
         
         Call call = callService.initiateCall(initiatorId, receiverId, callType);
         
-        // Generate Agora token for the call
+        // Use consistent channel name based on call ID
         String channelName = "call-" + call.getId();
-        String initiatorToken = agoraService.generateRtcToken(channelName, initiatorId.toString(), "doctor");
-        String receiverToken = agoraService.generateRtcToken(channelName, receiverId.toString(), "patient");
+        // Update roomId to match channelName for consistency
+        call.setRoomId(channelName);
+        
+        String initiatorToken = agoraService.generateRtcToken(channelName, initiatorId.toString(), "patient");
+        String receiverToken = agoraService.generateRtcToken(channelName, receiverId.toString(), "doctor");
         
         Map<String, Object> response = new HashMap<>();
         response.put("call", call);
@@ -77,7 +80,8 @@ public class CallController {
             map.put("receiverId", call.getReceiverId());
             map.put("callType", call.getCallType());
             map.put("status", call.getStatus());
-            map.put("roomId", call.getRoomId());
+            map.put("roomId", "call-" + call.getId());
+            map.put("channelName", "call-" + call.getId());
             map.put("createdAt", call.getStartedAt());
             userService.findById(call.getInitiatorId()).ifPresent(u -> {
                 map.put("patientName", u.getName());

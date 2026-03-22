@@ -17,7 +17,7 @@ export const useMaintenanceMode = () => {
 
     const checkMaintenanceMode = async () => {
       try {
-        const response = await adminAPI.getMaintenanceStatus();
+        const response = await adminAPI.getSettings();
         if (response.data?.maintenanceMode) {
           alert('System is under maintenance. You will be logged out.');
           logout();

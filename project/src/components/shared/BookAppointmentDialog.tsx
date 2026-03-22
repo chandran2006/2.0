@@ -50,8 +50,11 @@ export const BookAppointmentDialog: React.FC<BookAppointmentDialogProps> = ({ op
     setLoading(true);
     try {
       await appointmentAPI.bookAppointment({
-        ...formData,
-        patientId: user?.id,
+        doctorId: parseInt(formData.doctorId),
+        patientId: parseInt(user?.id || '0'),
+        appointmentDate: formData.appointmentDate,
+        symptoms: formData.symptoms,
+        consultationType: formData.consultationType,
         status: 'PENDING'
       });
       toast.success('Appointment booked successfully!');

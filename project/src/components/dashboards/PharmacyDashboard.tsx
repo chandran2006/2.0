@@ -44,6 +44,17 @@ const PharmacyDashboard: React.FC = () => {
     }
   };
 
+  const handleExport = () => {
+    const rows = ['Medicine,Manufacturer,Price,Stock,Available'];
+    medicines.forEach(m => rows.push(`${m.name},${m.manufacturer},${m.price},${m.stockLevel},${m.available}`));
+    const blob = new Blob([rows.join('\n')], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'inventory.csv'; a.click();
+    URL.revokeObjectURL(url);
+    toast.success('Inventory exported');
+  };
+
   const handleRefresh = () => {
     setLoading(true);
     loadData();
@@ -72,7 +83,7 @@ const PharmacyDashboard: React.FC = () => {
           <Button variant="outline" size="sm" onClick={handleRefresh} disabled={loading}>
             <RefreshCw className={`w-4 h-4 mr-1 ${loading ? 'animate-spin' : ''}`} /> Refresh
           </Button>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={handleExport}>
             <Download className="w-4 h-4 mr-1" /> Export
           </Button>
           <Button size="sm" onClick={() => navigate('/pharmacy/inventory')} className="bg-gradient-primary text-primary-foreground shadow-primary hover:opacity-90">

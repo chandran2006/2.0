@@ -42,7 +42,7 @@ const DoctorConsultationPage: React.FC = () => {
   const acceptRequest = async (request: any) => {
     try {
       await callAPI.acceptCall(request.id);
-      const channelName = `call-${request.id}`;
+      const channelName = request.channelName || request.roomId || `call-${request.id}`;
       const tokenResponse = await callAPI.getAgoraToken(channelName, user!.id, 'doctor');
       toast({ title: 'Call Accepted', description: 'Connecting to patient...' });
       navigate(`/video-call?room=${channelName}&appointmentId=${request.id}&token=${tokenResponse.data.token}`);

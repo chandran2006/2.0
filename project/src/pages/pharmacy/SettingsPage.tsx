@@ -10,7 +10,7 @@ import { authAPI } from '@/services/api';
 import DashboardLayout from '@/components/shared/DashboardLayout';
 
 const PharmacySettingsPage: React.FC = () => {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const [initialForm, setInitialForm] = useState({
     pharmacyName: '', phone: '', address: '', openTime: '09:00', closeTime: '21:00',
     emailNotifications: true, smsAlerts: true, lowStockAlerts: true, isOpen: true,
@@ -40,6 +40,7 @@ const PharmacySettingsPage: React.FC = () => {
         phone: form.phone,
         address: form.address
       });
+      updateUser({ pharmacyName: form.pharmacyName, phone: form.phone, address: form.address });
       toast.success('Settings saved successfully');
     } catch {
       toast.error('Failed to save settings');

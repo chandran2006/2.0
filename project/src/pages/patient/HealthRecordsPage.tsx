@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Heart, Activity, Plus, Trash2 } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
+import { FileText, Heart, Activity, Plus, Trash2, Edit2, Save, X } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,6 +13,10 @@ import DashboardLayout from '@/components/shared/DashboardLayout';
 
 const emptyForm = { type: '', doctor: '', result: '', date: '' };
 
+const VITALS_KEY = 'medora_vitals';
+
+const defaultVitals = { heartRate: '72', bloodPressure: '120/80', temperature: '98.6', weight: '70' };
+
 const HealthRecordsPage: React.FC = () => {
   const { user } = useAuth();
   const [records, setRecords] = useState<any[]>([]);
@@ -20,6 +24,12 @@ const HealthRecordsPage: React.FC = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [editingVitals, setEditingVitals] = useState(false);
+  const [vitals, setVitals] = useState(() => {
+    try { return JSON.parse(localStorage.getItem(VITALS_KEY) || 'null') || defaultVitals; }
+    catch { return defaultVitals; }
+  });
+  const [vitalsForm, setVitalsForm] = useState(vitals);
 
   useEffect(() => { loadRecords(); }, [user]);
 
@@ -34,6 +44,10 @@ const HealthRecordsPage: React.FC = () => {
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!form.type || !form.doctor || !form.result || !form.date) {
+      toast.error('Please fill all fields');
+      return;
+    }
     setSaving(true);
     try {
       await healthRecordAPI.create({ ...form, patientId: parseInt(user!.id) });
@@ -52,6 +66,13 @@ const HealthRecordsPage: React.FC = () => {
       toast.success('Record deleted');
       loadRecords();
     } catch { toast.error('Failed to delete record'); }
+  };
+
+  const saveVitals = () => {
+    localStorage.setItem(VITALS_KEY, JSON.stringify(vitalsForm));
+    setVitals(vitalsForm);
+    setEditingVitals(false);
+    toast.success('Vital statistics updated');
   };
 
   if (loading) return <DashboardLayout><div className="text-center py-8">Loading...</div></DashboardLayout>;
@@ -93,13 +114,47 @@ const HealthRecordsPage: React.FC = () => {
         </div>
 
         <Card className="shadow-card">
-          <CardContent className="p-6">
-            <h3 className="font-display text-lg font-bold mb-4">Vital Statistics</h3>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="font-display text-lg">Vital Statistics</CardTitle>
+              {editingVitals ? (
+                <div className="flex gap-2">
+                  <Button size="sm" variant="outline" onClick={() => { setVitalsForm(vitals); setEditingVitals(false); }}>
+                    <X className="w-3 h-3 mr-1" /> Cancel
+                  </Button>
+                  <Button size="sm" className="bg-gradient-primary" onClick={saveVitals}>
+                    <Save className="w-3 h-3 mr-1" /> Save
+                  </Button>
+                </div>
+              ) : (
+                <Button size="sm" variant="outline" onClick={() => setEditingVitals(true)}>
+                  <Edit2 className="w-3 h-3 mr-1" /> Edit
+                </Button>
+              )}
+            </div>
+          </CardHeader>
+          <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="p-4 rounded-lg bg-muted/50"><Heart className="w-5 h-5 text-destructive mb-2" /><p className="text-2xl font-bold">72</p><p className="text-xs text-muted-foreground">Heart Rate (bpm)</p></div>
-              <div className="p-4 rounded-lg bg-muted/50"><Activity className="w-5 h-5 text-info mb-2" /><p className="text-2xl font-bold">120/80</p><p className="text-xs text-muted-foreground">Blood Pressure</p></div>
-              <div className="p-4 rounded-lg bg-muted/50"><Activity className="w-5 h-5 text-warning mb-2" /><p className="text-2xl font-bold">98.6°F</p><p className="text-xs text-muted-foreground">Temperature</p></div>
-              <div className="p-4 rounded-lg bg-muted/50"><Activity className="w-5 h-5 text-success mb-2" /><p className="text-2xl font-bold">70 kg</p><p className="text-xs text-muted-foreground">Weight</p></div>
+              {[
+                { key: 'heartRate', label: 'Heart Rate', unit: 'bpm', icon: Heart, color: 'text-destructive' },
+                { key: 'bloodPressure', label: 'Blood Pressure', unit: 'mmHg', icon: Activity, color: 'text-info' },
+                { key: 'temperature', label: 'Temperature', unit: '°F', icon: Activity, color: 'text-warning' },
+                { key: 'weight', label: 'Weight', unit: 'kg', icon: Activity, color: 'text-success' },
+              ].map(({ key, label, unit, icon: Icon, color }) => (
+                <div key={key} className="p-4 rounded-lg bg-muted/50">
+                  <Icon className={`w-5 h-5 ${color} mb-2`} />
+                  {editingVitals ? (
+                    <Input
+                      value={vitalsForm[key as keyof typeof vitalsForm]}
+                      onChange={e => setVitalsForm({ ...vitalsForm, [key]: e.target.value })}
+                      className="h-8 text-lg font-bold mb-1"
+                    />
+                  ) : (
+                    <p className="text-2xl font-bold">{vitals[key as keyof typeof vitals]}</p>
+                  )}
+                  <p className="text-xs text-muted-foreground">{label} ({unit})</p>
+                </div>
+              ))}
             </div>
           </CardContent>
         </Card>

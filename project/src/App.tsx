@@ -21,6 +21,7 @@ import PharmacyPage from "./pages/patient/PharmacyPage";
 import MedicinesPage from "./pages/patient/MedicinesPage";
 import HealthRecordsPage from "./pages/patient/HealthRecordsPage";
 import SymptomCheckerPage from "./pages/patient/SymptomCheckerPage";
+import PatientProfilePage from "./pages/patient/ProfilePage";
 
 // Doctor Pages
 import PatientsPage from "./pages/doctor/PatientsPage";
@@ -29,6 +30,7 @@ import DoctorAppointmentsPage from "./pages/doctor/AppointmentsPage";
 import ConsultationsPage from "./pages/doctor/ConsultationsPage";
 import SchedulePage from "./pages/doctor/SchedulePage";
 import DoctorConsultationPage from "./pages/doctor/ConsultationRequestsPage";
+import DoctorProfilePage from "./pages/doctor/ProfilePage";
 
 // Call Pages
 import VideoCallPage from "./pages/VideoCallPage";
@@ -72,6 +74,7 @@ const App = () => (
             <Route path="/patient/medicines" element={<MedicinesPage />} />
             <Route path="/patient/health-records" element={<HealthRecordsPage />} />
             <Route path="/patient/symptom-checker" element={<SymptomCheckerPage />} />
+            <Route path="/patient/profile" element={<PatientProfilePage />} />
             
             {/* Doctor Routes */}
             <Route path="/doctor/appointments" element={<DoctorAppointmentsPage />} />
@@ -80,6 +83,7 @@ const App = () => (
             <Route path="/doctor/consultations" element={<ConsultationsPage />} />
             <Route path="/doctor/schedule" element={<SchedulePage />} />
             <Route path="/doctor/consultation-requests" element={<DoctorConsultationPage />} />
+            <Route path="/doctor/profile" element={<DoctorProfilePage />} />
             
             {/* Call Routes */}
             <Route path="/call" element={<VideoCallPage />} />

@@ -19,13 +19,17 @@ const DoctorsPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [waitingForDoctor, setWaitingForDoctor] = useState(false);
   const [currentCallId, setCurrentCallId] = useState<number | null>(null);
+  const [currentCallToken, setCurrentCallToken] = useState<string>('');
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
     loadDoctors();
-  }, [user, toast]);
+    const onFocus = () => loadDoctors();
+    window.addEventListener('focus', onFocus);
+    return () => window.removeEventListener('focus', onFocus);
+  }, []);
 
   useEffect(() => {
     let interval: any;
@@ -39,8 +43,7 @@ const DoctorsPage: React.FC = () => {
             clearInterval(interval);
             setWaitingForDoctor(false);
             const channelName = `call-${call.id}`;
-            const tokenResponse = await callAPI.getAgoraToken(channelName, user!.id, 'patient');
-            navigate(`/video-call?room=${channelName}&appointmentId=${call.id}&token=${tokenResponse.data.token}`);
+            navigate(`/video-call?room=${channelName}&appointmentId=${call.id}&token=${currentCallToken}`);
           } else if (call.status === 'REJECTED') {
             clearInterval(interval);
             setWaitingForDoctor(false);
@@ -57,7 +60,7 @@ const DoctorsPage: React.FC = () => {
       }, 2000);
     }
     return () => clearInterval(interval);
-  }, [waitingForDoctor, currentCallId, user, navigate, toast]);
+  }, [waitingForDoctor, currentCallId, currentCallToken, user, navigate, toast]);
 
   useEffect(() => {
     if (searchQuery) {
@@ -90,6 +93,7 @@ const DoctorsPage: React.FC = () => {
       
       const callData = response.data;
       setCurrentCallId(callData.call.id);
+      setCurrentCallToken(callData.initiatorToken || '');
       setWaitingForDoctor(true);
       
       toast({

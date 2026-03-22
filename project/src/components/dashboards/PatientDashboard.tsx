@@ -7,7 +7,6 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { appointmentAPI, prescriptionAPI, callAPI } from '@/services/api';
 import { BookAppointmentDialog } from '@/components/shared/BookAppointmentDialog';
-import { VideoCall } from '@/components/shared/VideoCall';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -34,8 +33,7 @@ const PatientDashboard: React.FC = () => {
   const [doctors, setDoctors] = useState<any[]>([]);
   const [onlineDoctors, setOnlineDoctors] = useState<any[]>([]);
   const [bookingOpen, setBookingOpen] = useState(false);
-  const [callOpen, setCallOpen] = useState(false);
-  const [callRoomId, setCallRoomId] = useState('');
+  const [selectedDoctorId, setSelectedDoctorId] = useState<string>('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -75,7 +73,17 @@ const PatientDashboard: React.FC = () => {
     setOnlineDoctors(prev => prev.filter(d => d.id !== data.doctorId));
   };
 
-  const startConsultation = async (doctorId: string) => {
+  const joinAppointmentCall = async (apt: any) => {
+    try {
+      const channelName = `appt-${apt.id}`;
+      const tokenRes = await callAPI.getAgoraToken(channelName, user!.id, 'patient');
+      navigate(`/video-call?room=${channelName}&appointmentId=${apt.id}&token=${tokenRes.data.token}`);
+    } catch {
+      toast.error('Failed to join call');
+    }
+  };
+
+  const startInstantConsultation = async (doctorId: string) => {
     try {
       const response = await callAPI.initiate({
         initiatorId: user?.id,
@@ -132,7 +140,7 @@ const PatientDashboard: React.FC = () => {
 
       {/* Quick Actions */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <button onClick={() => setBookingOpen(true)} className="flex items-center gap-3 p-4 rounded-xl bg-card border border-border shadow-card hover:shadow-card-hover transition-all group">
+        <button onClick={() => { setSelectedDoctorId(''); setBookingOpen(true); }} className="flex items-center gap-3 p-4 rounded-xl bg-card border border-border shadow-card hover:shadow-card-hover transition-all group">
           <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
             <Calendar className="w-5 h-5 text-primary-foreground" />
           </div>
@@ -214,7 +222,7 @@ const PatientDashboard: React.FC = () => {
                       <p className="text-sm font-medium">{apt.doctorName}</p>
                       <p className="text-xs text-muted-foreground">{new Date(apt.appointmentDate).toLocaleString()}</p>
                     </div>
-                    <Button size="sm" onClick={() => startConsultation(apt.doctorId)} className="h-8 bg-gradient-primary">
+                    <Button size="sm" onClick={() => joinAppointmentCall(apt)} className="h-8 bg-gradient-primary">
                       <Video className="w-3 h-3 mr-1" /> Join
                     </Button>
                   </div>
@@ -246,7 +254,7 @@ const PatientDashboard: React.FC = () => {
                     <span className="w-2 h-2 rounded-full bg-success animate-pulse-soft" />
                     <span className="text-xs text-success">Online</span>
                   </div>
-                  <Button size="sm" onClick={() => startConsultation(doc.id)} variant="outline" className="h-8">
+                  <Button size="sm" onClick={() => startInstantConsultation(doc.id)} variant="outline" className="h-8">
                     <Phone className="w-3 h-3 mr-1" /> Call
                   </Button>
                 </div>
@@ -342,7 +350,7 @@ const PatientDashboard: React.FC = () => {
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-semibold">₹500</p>
-                    <Button size="sm" onClick={() => setBookingOpen(true)} className="mt-2 bg-gradient-primary text-primary-foreground shadow-primary hover:opacity-90 h-8 text-xs">
+                    <Button size="sm" onClick={() => { setSelectedDoctorId(doc.id.toString()); setBookingOpen(true); }} className="mt-2 bg-gradient-primary text-primary-foreground shadow-primary hover:opacity-90 h-8 text-xs">
                       Book Now
                     </Button>
                   </div>
@@ -355,8 +363,7 @@ const PatientDashboard: React.FC = () => {
         </div>
       )}
 
-      <BookAppointmentDialog open={bookingOpen} onOpenChange={setBookingOpen} onSuccess={loadData} />
-      {callOpen && <VideoCall open={callOpen} onClose={() => setCallOpen(false)} roomId={callRoomId} userId={user?.id || ''} />}
+      <BookAppointmentDialog open={bookingOpen} onOpenChange={setBookingOpen} onSuccess={loadData} preselectedDoctorId={selectedDoctorId} />
     </div>
   );
 };

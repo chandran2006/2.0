@@ -90,8 +90,10 @@ const DoctorDashboard: React.FC = () => {
     if (!incomingCall) return;
     try {
       await callAPI.acceptCall(incomingCall.callId);
+      const channelName = incomingCall.channelName || incomingCall.roomId || `call-${incomingCall.callId}`;
+      const tokenRes = await callAPI.getAgoraToken(channelName, user!.id, 'doctor');
       toast.success('Call accepted! Joining video call...');
-      navigate(`/video-call?room=${incomingCall.roomId}`);
+      navigate(`/video-call?room=${channelName}&appointmentId=${incomingCall.callId}&token=${tokenRes.data.token}`);
       setIncomingCall(null);
     } catch (error) {
       console.error('Failed to accept call:', error);

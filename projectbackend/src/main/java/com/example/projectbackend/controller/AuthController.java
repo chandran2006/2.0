@@ -93,6 +93,8 @@ public class AuthController {
             if (updates.containsKey("phone")) user.setPhone(updates.get("phone"));
             if (updates.containsKey("address")) user.setAddress(updates.get("address"));
             if (updates.containsKey("name")) user.setName(updates.get("name"));
+            if (updates.containsKey("specialization")) user.setSpecialization(updates.get("specialization"));
+            if (updates.containsKey("licenseNumber")) user.setLicenseNumber(updates.get("licenseNumber"));
             return ResponseEntity.ok(userService.saveUser(user));
         }).orElse(ResponseEntity.notFound().build());
     }
